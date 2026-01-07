@@ -68,9 +68,14 @@ body {
   @apply shadow-md dark:shadow-black/40;
 }
 
-/* Filled Input: The M3 Standard */
+/* Standard M3 Input (Outlined or Filled without floating label) */
+.m3-input {
+  @apply w-full bg-[#F3EDF7] dark:bg-[#2B2930] rounded-t-xl rounded-b-none border-b-2 border-[#CAC4D0] dark:border-[#938F99] px-4 py-3 text-base focus:border-[#6750A4] dark:focus:border-[#D0BCFF] focus:bg-[#E7E0EC] dark:focus:bg-[#36343b] outline-none transition-all;
+}
+
+/* Filled Input: The M3 Standard (Removed 'peer' from @apply) */
 .m3-input-filled {
-  @apply w-full bg-[#F3EDF7] dark:bg-[#2B2930] rounded-t-xl rounded-b-none border-b-2 border-[#CAC4D0] dark:border-[#938F99] px-4 pt-6 pb-2 text-base focus:border-[#6750A4] dark:focus:border-[#D0BCFF] focus:bg-[#E7E0EC] dark:focus:bg-[#36343b] outline-none transition-all placeholder-transparent peer;
+  @apply w-full bg-[#F3EDF7] dark:bg-[#2B2930] rounded-t-xl rounded-b-none border-b-2 border-[#CAC4D0] dark:border-[#938F99] px-4 pt-6 pb-2 text-base focus:border-[#6750A4] dark:focus:border-[#D0BCFF] focus:bg-[#E7E0EC] dark:focus:bg-[#36343b] outline-none transition-all placeholder-transparent;
 }
 
 /* Floating Label for Filled Input */

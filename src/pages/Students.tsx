@@ -77,7 +77,7 @@ export default function Students() {
         <div className="flex gap-3">
           <button
             onClick={() => { setEditingStudent(null); setIsFormOpen(true); }}
-            className="m3-button m3-button-primary shadow-xl shadow-blue-600/20"
+            className="m3-btn m3-btn-primary shadow-xl shadow-blue-600/20"
           >
             <Plus className="h-5 w-5" />
             {t('add_student')}
@@ -448,14 +448,14 @@ function StudentModal({ student, onClose, onSuccess }: { student: Student | null
               <button
                 type="submit"
                 disabled={saving || uploading}
-                className="m3-button m3-button-primary px-8 py-2.5 text-sm"
+                className="m3-btn m3-btn-primary px-8 py-2.5 text-sm"
               >
                 {saving ? t('saving') : t('save')}
               </button>
               <button
                 type="button"
                 onClick={onClose}
-                className="m3-button bg-white text-gray-700 hover:bg-gray-100 border border-gray-200 px-6 py-2.5 text-sm"
+                className="m3-btn bg-white text-gray-700 hover:bg-gray-100 border border-gray-200 px-6 py-2.5 text-sm"
               >
                 {t('cancel')}
               </button>
