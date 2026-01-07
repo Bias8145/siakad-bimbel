@@ -576,7 +576,7 @@ export default function StudentDashboard() {
                       <div className="bg-white/60 dark:bg-white/10 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-md shadow-sm">
                         <Award className="h-7 w-7 text-[#31111D] dark:text-[#FFD8E4]" />
                       </div>
-                      <h3 className="text-2xl font-bold text-[#31111D] dark:text-[#FFD8E4] mb-3">Tetap Semangat! 🚀</h3>
+                      <h3 className="text-2xl font-bold text-[#31111D] dark:text-[#FFD8E4] mb-3">Tetap Semangat!</h3>
                       <p className="text-[#31111D]/80 dark:text-[#FFD8E4]/80 text-base mb-6 max-w-sm leading-relaxed font-medium">
                         "Pendidikan adalah senjata paling mematikan di dunia, karena dengan pendidikan, Anda dapat mengubah dunia."
                       </p>
