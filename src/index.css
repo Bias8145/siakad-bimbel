@@ -3,94 +3,115 @@
 @import '@fontsource/outfit/500.css';
 @import '@fontsource/outfit/600.css';
 @import '@fontsource/outfit/700.css';
+@import '@fontsource/outfit/800.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --md-sys-color-primary: #4F378B;
-  --md-sys-color-background: #FEF7FF;
+  /* Material 3 Color Tokens (Light) */
+  --md-sys-color-primary: #6750A4;
+  --md-sys-color-on-primary: #FFFFFF;
+  --md-sys-color-primary-container: #EADDFF;
+  --md-sys-color-on-primary-container: #21005D;
+  
+  --md-sys-color-secondary: #625B71;
+  --md-sys-color-secondary-container: #E8DEF8;
+  --md-sys-color-on-secondary-container: #1D192B;
+  
+  --md-sys-color-tertiary: #7D5260;
+  --md-sys-color-tertiary-container: #FFD8E4;
+  --md-sys-color-on-tertiary-container: #31111D;
+
   --md-sys-color-surface: #FEF7FF;
+  --md-sys-color-surface-dim: #DED8E1;
+  --md-sys-color-surface-container: #F3EDF7;
+  --md-sys-color-surface-container-high: #ECE6F0;
+  
+  --md-sys-color-outline: #79747E;
+  --md-sys-color-outline-variant: #CAC4D0;
 }
 
 .dark {
+  /* Material 3 Color Tokens (Dark) */
   --md-sys-color-primary: #D0BCFF;
-  --md-sys-color-background: #141218;
-  --md-sys-color-surface: #1D1B20;
+  --md-sys-color-on-primary: #381E72;
+  --md-sys-color-primary-container: #4F378B;
+  --md-sys-color-on-primary-container: #EADDFF;
+  
+  --md-sys-color-secondary: #CCC2DC;
+  --md-sys-color-secondary-container: #4A4458;
+  --md-sys-color-on-secondary-container: #E8DEF8;
+
+  --md-sys-color-surface: #141218;
+  --md-sys-color-surface-dim: #141218;
+  --md-sys-color-surface-container: #1D1B20;
+  --md-sys-color-surface-container-high: #2B2930;
+  
+  --md-sys-color-outline: #938F99;
+  --md-sys-color-outline-variant: #49454F;
 }
 
 body {
   font-family: 'Outfit', sans-serif;
-  @apply bg-[#FEF7FF] text-[#1D1B20] dark:bg-[#141218] dark:text-[#E6E1E5] transition-colors duration-300;
-  margin: 0;
-  padding: 0;
+  @apply bg-[#FEF7FF] text-[#1D1B20] dark:bg-[#141218] dark:text-[#E6E1E5] transition-colors duration-300 antialiased;
 }
 
-/* M3 Expressive Utilities */
+/* M3 Expressive Components */
+
+/* Card: High elevation, rounded corners */
 .m3-card {
-  @apply bg-white dark:bg-[#1D1B20] rounded-[28px] shadow-sm border border-gray-100 dark:border-gray-800 transition-all duration-300;
+  @apply bg-white dark:bg-[#1D1B20] rounded-[24px] shadow-sm border border-gray-100 dark:border-white/5 transition-all duration-300;
 }
-
 .m3-card:hover {
-  @apply shadow-md transform -translate-y-1 dark:shadow-black/50;
+  @apply shadow-md dark:shadow-black/40;
 }
 
-.m3-button {
-  @apply rounded-full px-6 py-3 font-medium transition-all duration-200 active:scale-95 flex items-center justify-center gap-2;
+/* Filled Input: The M3 Standard */
+.m3-input-filled {
+  @apply w-full bg-[#F3EDF7] dark:bg-[#2B2930] rounded-t-xl rounded-b-none border-b-2 border-[#CAC4D0] dark:border-[#938F99] px-4 pt-6 pb-2 text-base focus:border-[#6750A4] dark:focus:border-[#D0BCFF] focus:bg-[#E7E0EC] dark:focus:bg-[#36343b] outline-none transition-all placeholder-transparent peer;
 }
 
-.m3-button-primary {
-  @apply bg-[#4F378B] text-white hover:bg-[#6750A4] shadow-lg shadow-[#4F378B]/20 dark:bg-[#D0BCFF] dark:text-[#381E72] dark:hover:bg-[#E8DEF8] dark:shadow-[#D0BCFF]/10;
+/* Floating Label for Filled Input */
+.m3-label-floating {
+  @apply absolute left-4 top-4 text-gray-500 dark:text-gray-400 text-base transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-xs peer-focus:text-[#6750A4] dark:peer-focus:text-[#D0BCFF] pointer-events-none;
 }
 
-.m3-button-secondary {
-  @apply bg-[#EADDFF] text-[#21005D] hover:bg-[#D0BCFF] dark:bg-[#4A4458] dark:text-[#E8DEF8] dark:hover:bg-[#635b74];
+/* Buttons */
+.m3-btn {
+  @apply h-12 px-6 rounded-full font-medium text-sm tracking-wide transition-all duration-300 active:scale-95 flex items-center justify-center gap-2;
+}
+.m3-btn-primary {
+  @apply bg-[#6750A4] text-white hover:bg-[#6750A4]/90 hover:shadow-lg hover:shadow-[#6750A4]/20 dark:bg-[#D0BCFF] dark:text-[#381E72] dark:hover:bg-[#E8DEF8];
+}
+.m3-btn-tonal {
+  @apply bg-[#E8DEF8] text-[#1D192B] hover:bg-[#D0BCFF] dark:bg-[#4A4458] dark:text-[#E8DEF8] dark:hover:bg-[#635b74];
+}
+.m3-btn-text {
+  @apply text-[#6750A4] hover:bg-[#6750A4]/10 dark:text-[#D0BCFF] dark:hover:bg-[#D0BCFF]/10;
 }
 
-.m3-input {
-  @apply w-full rounded-2xl border-gray-200 bg-gray-50/50 px-4 py-3 focus:border-[#4F378B] focus:ring-[#4F378B]/20 transition-all dark:bg-[#2B2930] dark:border-gray-700 dark:text-white dark:focus:border-[#D0BCFF] dark:focus:ring-[#D0BCFF]/20;
+/* Navigation Pill */
+.nav-pill {
+  @apply flex items-center gap-3 px-4 py-3 rounded-full text-sm font-medium transition-all duration-200;
+}
+.nav-pill.active {
+  @apply bg-[#E8DEF8] text-[#1D192B] font-bold dark:bg-[#4F378B] dark:text-[#EADDFF];
+}
+.nav-pill:not(.active) {
+  @apply text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5;
 }
 
-/* Glass Utilities */
-.glass-panel {
-  @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-xl dark:bg-[#1D1B20]/80 dark:border-white/5 dark:shadow-black/50;
-}
-
-.glass-card {
-  @apply bg-white/60 backdrop-blur-md border border-white/30 shadow-lg rounded-[24px] dark:bg-[#2B2930]/60 dark:border-white/10 dark:shadow-black/30;
-}
-
-.glass-input {
-  @apply bg-white/50 backdrop-blur-sm border border-gray-200 focus:bg-white/80 transition-all dark:bg-black/20 dark:border-gray-700 dark:text-white dark:focus:bg-black/40;
-}
-
-/* Custom Scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #E7E0EC;
-  border-radius: 4px;
-}
-.dark ::-webkit-scrollbar-thumb {
-  background: #49454F;
-}
-::-webkit-scrollbar-thumb:hover {
   background: #CAC4D0;
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #79747E;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
-}
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  border-radius: 10px;
 }
