@@ -2,6 +2,12 @@ export const translations = {
   en: {
     app_name: 'Bimbel Cendekia',
     
+    // Time-based Greetings
+    good_morning: 'Good Morning',
+    good_afternoon: 'Good Afternoon',
+    good_evening: 'Good Evening',
+    good_night: 'Good Night',
+
     // Navigation
     dashboard: 'Dashboard',
     students: 'Students',
@@ -192,6 +198,12 @@ export const translations = {
   id: {
     app_name: 'Bimbel Cendekia',
     
+    // Time-based Greetings
+    good_morning: 'Selamat Pagi',
+    good_afternoon: 'Selamat Siang',
+    good_evening: 'Selamat Sore',
+    good_night: 'Selamat Malam',
+
     // Navigation
     dashboard: 'Beranda',
     students: 'Data Siswa',

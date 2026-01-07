@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   LogOut, Calendar, GraduationCap, Clock, User, Printer, Layout, 
   UserCircle, Upload, Globe, MessageCircle, ArrowRight,
-  TrendingUp, BookOpen, Star, MapPin, Activity, CheckCircle2
+  TrendingUp, Activity, CheckCircle2, Star, MapPin
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { id as dateLocale } from 'date-fns/locale';
@@ -16,7 +16,7 @@ import toast from 'react-hot-toast';
 import { openWhatsApp, ADMIN_PHONE } from '../utils/whatsapp';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, 
-  PieChart, Pie, Cell, AreaChart, Area
+  PieChart, Pie, Cell
 } from 'recharts';
 
 export default function StudentDashboard() {
@@ -194,80 +194,97 @@ export default function StudentDashboard() {
     }
   };
 
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return t('good_morning');
+    if (hour < 15) return t('good_afternoon');
+    if (hour < 18) return t('good_evening');
+    return t('good_night');
+  };
+
   if (!student) return null;
 
   return (
     <div className="min-h-screen bg-[#FEF7FF] p-4 sm:p-8 font-sans pb-32 lg:pb-8">
-      {/* Header */}
-      <header className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center mb-8 bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 no-print gap-6">
-        <div className="flex items-center gap-5 w-full lg:w-auto">
-          <div className="h-16 w-16 rounded-full bg-[#EADDFF] flex items-center justify-center text-[#21005D] font-bold text-2xl overflow-hidden border-4 border-white shadow-lg shadow-purple-100">
-            {student.photo_url ? (
-              <img src={student.photo_url} alt={student.full_name} className="h-full w-full object-cover" />
-            ) : (
-              student.full_name.charAt(0)
-            )}
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-[#1D1B20] tracking-tight">{student.full_name}</h1>
-            <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-              <span className="bg-gray-100 px-2 py-0.5 rounded-md font-medium">{student.grade_level}</span>
-              <span>•</span>
-              <span className="text-[#4F378B] font-medium">{student.branch || 'Pusat'}</span>
+      {/* Header - Responsive Layout Fix */}
+      <header className="max-w-7xl mx-auto mb-8 bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 no-print">
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
+          {/* Profile Section */}
+          <div className="flex flex-col sm:flex-row items-center gap-5 w-full lg:w-auto text-center sm:text-left">
+            <div className="h-20 w-20 rounded-full bg-[#EADDFF] flex items-center justify-center text-[#21005D] font-bold text-2xl overflow-hidden border-4 border-white shadow-lg shadow-purple-100 flex-shrink-0">
+              {student.photo_url ? (
+                <img src={student.photo_url} alt={student.full_name} className="h-full w-full object-cover" />
+              ) : (
+                student.full_name.charAt(0)
+              )}
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-[#1D1B20] tracking-tight">{student.full_name}</h1>
+              <div className="flex items-center justify-center sm:justify-start gap-2 text-sm text-gray-500 mt-1">
+                <span className="bg-gray-100 px-3 py-1 rounded-full font-medium border border-gray-200">{student.grade_level}</span>
+                <span className="text-gray-300">•</span>
+                <span className="text-[#4F378B] font-medium flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  {student.branch || 'Pusat'}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-        
-        <div className="flex flex-wrap items-center justify-center lg:justify-end gap-3 w-full lg:w-auto">
-          <button 
-            onClick={() => openWhatsApp(ADMIN_PHONE, `Halo Admin Bimbel Cendekia, saya ${student.full_name} (Siswa) ingin bertanya.`)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-green-500 text-white text-sm font-bold shadow-lg shadow-green-500/30 hover:bg-green-600 hover:scale-105 transition-all"
-          >
-            <MessageCircle className="h-4 w-4" />
-            <span>Hubungi Admin</span>
-          </button>
           
-          <div className="h-8 w-[1px] bg-gray-200 hidden sm:block"></div>
-
-          <button 
-            onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            <Globe className="h-4 w-4" />
-            {language === 'en' ? 'EN' : 'ID'}
-          </button>
-          
-          <button 
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-red-50 text-red-600 font-medium hover:bg-red-100 transition-colors"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('sign_out')}</span>
-          </button>
+          {/* Actions Section - Grid on Mobile, Row on Desktop */}
+          <div className="grid grid-cols-2 sm:flex items-center gap-3 w-full lg:w-auto">
+            <button 
+              onClick={() => openWhatsApp(ADMIN_PHONE, `Halo Admin Bimbel Cendekia, saya ${student.full_name} (Siswa) ingin bertanya.`)}
+              className="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-green-500 text-white text-sm font-bold shadow-lg shadow-green-500/30 hover:bg-green-600 hover:scale-105 transition-all w-full sm:w-auto"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span>Hubungi Admin</span>
+            </button>
+            
+            <button 
+              onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-full bg-white border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors w-full sm:w-auto"
+            >
+              <Globe className="h-4 w-4" />
+              {language === 'en' ? 'EN' : 'ID'}
+            </button>
+            
+            <button 
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-full bg-red-50 text-red-600 font-medium hover:bg-red-100 transition-colors w-full sm:w-auto"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="sm:inline">{t('sign_out')}</span>
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Navigation Tabs */}
-      <div className="max-w-7xl mx-auto mb-8 flex justify-center sm:justify-start gap-2 overflow-x-auto pb-2 no-print scrollbar-hide">
-        {[
-          { id: 'overview', icon: Layout, label: t('tab_overview') },
-          { id: 'academics', icon: GraduationCap, label: t('tab_academics') },
-          { id: 'profile', icon: UserCircle, label: t('tab_profile') }
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={clsx(
-              "px-6 py-3 rounded-full text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2",
-              activeTab === tab.id 
-                ? "bg-[#4F378B] text-white shadow-lg shadow-[#4F378B]/20 scale-105" 
-                : "bg-white text-gray-500 hover:bg-gray-50 border border-transparent hover:border-gray-200"
-            )}
-          >
-            <tab.icon className="h-4 w-4" />
-            {tab.label}
-          </button>
-        ))}
+      {/* Navigation Tabs - Scrollable Fix */}
+      <div className="max-w-7xl mx-auto mb-8 no-print">
+        <div className="flex justify-start sm:justify-center overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex gap-2 bg-white/50 p-1.5 rounded-full border border-white/60 backdrop-blur-sm">
+            {[
+              { id: 'overview', icon: Layout, label: t('tab_overview') },
+              { id: 'academics', icon: GraduationCap, label: t('tab_academics') },
+              { id: 'profile', icon: UserCircle, label: t('tab_profile') }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={clsx(
+                  "px-6 py-3 rounded-full text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2",
+                  activeTab === tab.id 
+                    ? "bg-[#4F378B] text-white shadow-lg shadow-[#4F378B]/20 scale-100" 
+                    : "text-gray-500 hover:bg-white hover:text-[#4F378B]"
+                )}
+              >
+                <tab.icon className="h-4 w-4" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <main className="max-w-7xl mx-auto pb-12">
@@ -287,9 +304,13 @@ export default function StudentDashboard() {
                   {/* Welcome Card */}
                   <div className="md:col-span-2 bg-gradient-to-br from-[#4F378B] to-[#21005D] rounded-[32px] p-8 text-white shadow-xl shadow-purple-900/20 relative overflow-hidden group">
                     <div className="relative z-10">
-                      <h2 className="text-3xl font-bold mb-2">{t('welcome')} {student.full_name.split(' ')[0]}!</h2>
+                      <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-purple-100 mb-3 border border-white/10">
+                        <Clock className="h-3 w-3" />
+                        {getTimeBasedGreeting()}
+                      </div>
+                      <h2 className="text-3xl font-bold mb-2">{student.full_name.split(' ')[0]}!</h2>
                       <p className="text-purple-100 opacity-90 mb-6 max-w-md">{t('hello_student')}</p>
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 flex-wrap">
                         <button 
                           onClick={() => setActiveTab('academics')}
                           className="bg-white text-[#4F378B] px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-50 transition-all flex items-center gap-2 shadow-lg"
