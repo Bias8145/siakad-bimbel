@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Student } from '../types';
-import { Plus, Search, Edit2, Trash2, Mail, Phone, Upload, User, MapPin } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Mail, Phone, Upload, User, MapPin, MessageCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useLanguage } from '../contexts/LanguageContext';
 import ConfirmationModal from '../components/ConfirmationModal';
+import { openWhatsApp } from '../utils/whatsapp';
 
 export default function Students() {
   const { t } = useLanguage();
@@ -155,9 +156,20 @@ export default function Students() {
                     </td>
                     <td className="whitespace-nowrap px-4 py-5">
                       <div className="text-sm font-medium text-gray-900">{student.parent_name}</div>
-                      <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
-                        <Phone className="h-3 w-3" />
-                        {student.parent_phone}
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="text-xs text-gray-500 flex items-center gap-1">
+                          <Phone className="h-3 w-3" />
+                          {student.parent_phone}
+                        </div>
+                        {student.parent_phone && (
+                          <button 
+                            onClick={() => openWhatsApp(student.parent_phone, `Halo Bapak/Ibu ${student.parent_name}, wali dari siswa ${student.full_name}.`)}
+                            className="p-1 rounded-full bg-green-100 text-green-600 hover:bg-green-200 transition-colors"
+                            title="Chat WhatsApp"
+                          >
+                            <MessageCircle className="h-3 w-3" />
+                          </button>
+                        )}
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-4 py-5">
