@@ -1,0 +1,108 @@
+@import '@fontsource/outfit/300.css';
+@import '@fontsource/outfit/400.css';
+@import '@fontsource/outfit/500.css';
+@import '@fontsource/outfit/600.css';
+@import '@fontsource/outfit/700.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Material 3 Expressive Color Tokens */
+  --md-sys-color-primary: #4F378B;
+  --md-sys-color-on-primary: #FFFFFF;
+  --md-sys-color-primary-container: #EADDFF;
+  --md-sys-color-on-primary-container: #21005D;
+  
+  --md-sys-color-secondary: #625B71;
+  --md-sys-color-secondary-container: #E8DEF8;
+  --md-sys-color-on-secondary-container: #1D192B;
+  
+  --md-sys-color-tertiary: #7D5260;
+  --md-sys-color-tertiary-container: #FFD8E4;
+  --md-sys-color-on-tertiary-container: #31111D;
+  
+  --md-sys-color-background: #FEF7FF;
+  --md-sys-color-surface: #FEF7FF;
+  --md-sys-color-surface-variant: #E7E0EC;
+  --md-sys-color-on-surface: #1D1B20;
+  
+  --md-sys-color-outline: #79747E;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-surface);
+  margin: 0;
+  padding: 0;
+}
+
+/* M3 Expressive Utilities */
+.m3-card {
+  @apply bg-white rounded-[28px] shadow-sm border border-gray-100 transition-all duration-300;
+}
+
+.m3-card:hover {
+  @apply shadow-md transform -translate-y-1;
+}
+
+.m3-button {
+  @apply rounded-full px-6 py-3 font-medium transition-all duration-200 active:scale-95 flex items-center justify-center gap-2;
+}
+
+.m3-button-primary {
+  @apply bg-[#4F378B] text-white hover:bg-[#6750A4] shadow-lg shadow-[#4F378B]/20;
+}
+
+.m3-button-secondary {
+  @apply bg-[#EADDFF] text-[#21005D] hover:bg-[#D0BCFF];
+}
+
+.m3-input {
+  @apply w-full rounded-2xl border-gray-200 bg-gray-50/50 px-4 py-3 focus:border-[#4F378B] focus:ring-[#4F378B]/20 transition-all;
+}
+
+/* Glass Utilities */
+.glass-panel {
+  @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-xl;
+}
+
+.glass-card {
+  @apply bg-white/60 backdrop-blur-md border border-white/30 shadow-lg rounded-[24px];
+}
+
+.glass-input {
+  @apply bg-white/50 backdrop-blur-sm border border-gray-200 focus:bg-white/80 transition-all;
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+  .m3-card, .glass-card, .glass-panel {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    break-inside: avoid;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E7E0EC;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #CAC4D0;
+}
