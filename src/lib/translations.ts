@@ -164,6 +164,17 @@ export const translations = {
     profile_details: 'Profile Details',
     contact_admin_note: 'If there are errors in your profile data, please contact the administration staff or homeroom teacher to make changes.',
     
+    // Student Overview Redesign
+    next_class: 'Next Class',
+    no_upcoming_class: 'No upcoming classes today',
+    gpa_score: 'Average Score',
+    academic_status: 'Academic Status',
+    good_job: 'Great Job!',
+    keep_improving: 'Keep Improving',
+    attendance_rate: 'Attendance Rate',
+    contact_admin: 'Contact Admin',
+    view_schedule: 'View Schedule',
+    
     // Grade Levels
     preschool: 'Pre-School',
     elementary: 'Elementary (SD)',
@@ -343,6 +354,17 @@ export const translations = {
     profile_details: 'Detail Profil',
     contact_admin_note: 'Jika terdapat kesalahan data profil, silakan hubungi staf administrasi atau wali kelas untuk melakukan perubahan.',
     
+    // Student Overview Redesign
+    next_class: 'Kelas Berikutnya',
+    no_upcoming_class: 'Tidak ada kelas lagi hari ini',
+    gpa_score: 'Rata-Rata Nilai',
+    academic_status: 'Status Akademik',
+    good_job: 'Kerja Bagus!',
+    keep_improving: 'Tingkatkan Lagi',
+    attendance_rate: 'Persentase Kehadiran',
+    contact_admin: 'Hubungi Admin',
+    view_schedule: 'Lihat Jadwal',
+
     // Grade Levels
     preschool: 'Pra-Sekolah',
     elementary: 'Sekolah Dasar (SD)',

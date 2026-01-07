@@ -8,7 +8,6 @@ import {
   GraduationCap, 
   LogOut,
   Globe,
-  MoreHorizontal
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { supabase } from '../lib/supabase';
@@ -57,7 +56,7 @@ export default function Layout() {
               </div>
             </div>
 
-            {/* Desktop Navigation Links */}
+            {/* Desktop Navigation Links (Inline Center) */}
             <div className="flex items-center gap-1 bg-gray-100/50 p-1.5 rounded-full border border-gray-200/50">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href;
@@ -126,15 +125,16 @@ export default function Layout() {
       </nav>
 
       {/* ================= MAIN CONTENT ================= */}
-      <main className="pt-20 lg:pt-28 pb-28 lg:pb-10 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto min-h-screen transition-all duration-300">
+      {/* Added extra padding bottom to prevent cut-off by floating nav */}
+      <main className="pt-20 lg:pt-28 pb-32 lg:pb-10 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto min-h-screen transition-all duration-300">
         <div className="animate-in fade-in duration-500 slide-in-from-bottom-4">
           <Outlet />
         </div>
       </main>
 
-      {/* ================= MOBILE BOTTOM NAVIGATION ================= */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 pb-safe pt-2 px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-        <div className="flex justify-around items-center">
+      {/* ================= MOBILE FLOATING BOTTOM NAVIGATION ================= */}
+      <nav className="lg:hidden fixed bottom-6 left-4 right-4 z-50">
+        <div className="bg-white/90 backdrop-blur-xl border border-white/40 rounded-[24px] shadow-2xl shadow-purple-900/10 px-2 py-2 flex justify-around items-center">
           {navigation.map((item) => {
             const isActive = location.pathname === item.href;
             return (
@@ -142,17 +142,17 @@ export default function Layout() {
                 key={item.name}
                 to={item.href}
                 className={clsx(
-                  "flex flex-col items-center justify-center w-full py-2 rounded-xl transition-all duration-200",
+                  "relative flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300",
                   isActive ? "text-[#4F378B]" : "text-gray-400 hover:text-gray-600"
                 )}
               >
-                <div className={clsx(
-                  "p-1.5 rounded-xl mb-1 transition-all duration-200",
-                  isActive ? "bg-[#EADDFF]" : "bg-transparent"
-                )}>
-                  <item.icon className={clsx("h-5 w-5", isActive ? "fill-current" : "stroke-current")} strokeWidth={isActive ? 2.5 : 2} />
-                </div>
-                <span className="text-[10px] font-medium leading-none">{item.name}</span>
+                {isActive && (
+                  <div className="absolute inset-0 bg-[#EADDFF] rounded-2xl -z-10 scale-90 animate-in zoom-in duration-200"></div>
+                )}
+                <item.icon 
+                  className={clsx("h-6 w-6 transition-transform duration-200", isActive ? "scale-110" : "")} 
+                  strokeWidth={isActive ? 2.5 : 2} 
+                />
               </NavLink>
             );
           })}

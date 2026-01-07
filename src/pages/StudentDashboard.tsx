@@ -4,7 +4,11 @@ import { supabase } from '../lib/supabase';
 import { Grade, Schedule, Attendance } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Calendar, GraduationCap, Clock, User, Printer, Layout, UserCircle, Upload, Globe, MessageCircle, AlertCircle } from 'lucide-react';
+import { 
+  LogOut, Calendar, GraduationCap, Clock, User, Printer, Layout, 
+  UserCircle, Upload, Globe, MessageCircle, AlertCircle, ArrowRight,
+  TrendingUp, BookOpen, Star
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { id as dateLocale } from 'date-fns/locale';
 import { clsx } from 'clsx';
@@ -22,6 +26,8 @@ export default function StudentDashboard() {
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [nextClass, setNextClass] = useState<Schedule | null>(null);
+  const [avgScore, setAvgScore] = useState(0);
 
   useEffect(() => {
     if (!student) return;
@@ -35,6 +41,12 @@ export default function StudentDashboard() {
           .eq('student_id', student.id)
           .order('date', { ascending: false });
         
+        // Calculate Avg
+        if (gradesData && gradesData.length > 0) {
+          const total = gradesData.reduce((acc, curr) => acc + Number(curr.score), 0);
+          setAvgScore(Math.round(total / gradesData.length));
+        }
+
         // Fetch Schedule
         let query = supabase
           .from('schedules')
@@ -47,6 +59,19 @@ export default function StudentDashboard() {
         }
 
         const { data: scheduleData } = await query;
+
+        // Determine Next Class
+        if (scheduleData) {
+          const daysMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+          const today = daysMap[new Date().getDay()];
+          const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false });
+
+          // Simple logic: Find class today that hasn't started, or just show first class of today
+          const todayClasses = scheduleData.filter(s => s.day_of_week === today);
+          const upcoming = todayClasses.find(s => s.start_time > nowTime);
+          
+          setNextClass(upcoming || todayClasses[0] || null);
+        }
 
         // Fetch Attendance
         const { data: attendanceData } = await supabase
@@ -126,7 +151,7 @@ export default function StudentDashboard() {
   if (!student) return null;
 
   return (
-    <div className="min-h-screen bg-[#FEF7FF] p-4 sm:p-8 font-sans pb-24 lg:pb-8">
+    <div className="min-h-screen bg-[#FEF7FF] p-4 sm:p-8 font-sans pb-32 lg:pb-8">
       {/* Header */}
       <header className="max-w-6xl mx-auto flex flex-col lg:flex-row justify-between items-center mb-8 bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 no-print gap-6">
         <div className="flex items-center gap-5 w-full lg:w-auto">
@@ -207,80 +232,128 @@ export default function StudentDashboard() {
           </div>
         ) : (
           <>
-            {/* Overview Tab */}
+            {/* Overview Tab (Redesigned - Bento Grid) */}
             {activeTab === 'overview' && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {/* Welcome Card */}
-                <div className="lg:col-span-3 bg-gradient-to-br from-[#4F378B] to-[#21005D] rounded-[32px] p-8 sm:p-10 text-white shadow-xl shadow-purple-900/20 relative overflow-hidden group">
-                  <div className="relative z-10 max-w-2xl">
-                    <h2 className="text-3xl sm:text-4xl font-bold mb-3">{t('welcome')} {student.full_name.split(' ')[0]}! 👋</h2>
-                    <p className="text-purple-100 text-lg leading-relaxed opacity-90">{t('hello_student')}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                
+                {/* 1. Welcome Card (Large) */}
+                <div className="col-span-1 md:col-span-2 lg:col-span-2 bg-gradient-to-br from-[#4F378B] to-[#21005D] rounded-[32px] p-8 text-white shadow-xl shadow-purple-900/20 relative overflow-hidden group">
+                  <div className="relative z-10">
+                    <h2 className="text-3xl font-bold mb-2">{t('welcome')} {student.full_name.split(' ')[0]}!</h2>
+                    <p className="text-purple-100 opacity-90 mb-6">{t('hello_student')}</p>
+                    <button 
+                      onClick={() => setActiveTab('academics')}
+                      className="bg-white/20 backdrop-blur-md border border-white/30 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-white hover:text-[#4F378B] transition-all flex items-center gap-2"
+                    >
+                      {t('my_grades')} <ArrowRight className="h-4 w-4" />
+                    </button>
                   </div>
-                  <div className="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity duration-500">
-                    <GraduationCap className="h-64 w-64 transform translate-x-12 translate-y-12 -rotate-12" />
-                  </div>
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-pulse"></div>
+                  <GraduationCap className="absolute right-[-20px] bottom-[-20px] h-48 w-48 text-white opacity-10 rotate-12" />
                 </div>
 
-                {/* Recent Attendance */}
-                <div className="lg:col-span-2 m3-card p-6 sm:p-8">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="bg-[#FFD8E4] p-3 rounded-2xl">
-                      <Clock className="h-6 w-6 text-[#31111D]" />
+                {/* 2. Next Class Card */}
+                <div className="col-span-1 md:col-span-1 lg:col-span-1 bg-white rounded-[32px] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-orange-100 p-2.5 rounded-xl">
+                      <Clock className="h-5 w-5 text-orange-600" />
                     </div>
+                    <h3 className="font-bold text-gray-900">{t('next_class')}</h3>
+                  </div>
+                  {nextClass ? (
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900">{t('recent_attendance')}</h2>
-                      <p className="text-sm text-gray-500">5 Kehadiran Terakhir</p>
+                      <p className="text-2xl font-bold text-[#1D1B20] mb-1">{nextClass.subject}</p>
+                      <p className="text-sm text-gray-500 flex items-center gap-1">
+                        <User className="h-3 w-3" /> {nextClass.teacher_name}
+                      </p>
+                      <div className="mt-4 inline-block bg-orange-50 text-orange-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                        {nextClass.start_time.slice(0, 5)} - {nextClass.end_time.slice(0, 5)}
+                      </div>
                     </div>
-                  </div>
-                  <div className="overflow-hidden rounded-2xl border border-gray-100">
-                    <table className="w-full">
-                      <tbody className="divide-y divide-gray-50 bg-gray-50/30">
-                        {attendance.length > 0 ? attendance.slice(0, 5).map(record => (
-                          <tr key={record.id} className="hover:bg-white transition-colors">
-                            <td className="py-4 px-4 text-sm font-medium text-gray-700">
-                              {format(new Date(record.date), 'EEEE, dd MMMM yyyy', { locale: dateLocale })}
-                            </td>
-                            <td className="py-4 px-4 text-right">
-                              <span className={clsx(
-                                "px-3 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-1.5",
-                                record.status === 'Present' && "bg-green-100 text-green-700",
-                                record.status === 'Sick' && "bg-blue-100 text-blue-700",
-                                record.status === 'Permission' && "bg-yellow-100 text-yellow-700",
-                                record.status === 'Alpha' && "bg-red-100 text-red-700",
-                              )}>
-                                <span className={clsx("w-1.5 h-1.5 rounded-full", 
-                                  record.status === 'Present' ? "bg-green-500" :
-                                  record.status === 'Sick' ? "bg-blue-500" :
-                                  record.status === 'Permission' ? "bg-yellow-500" : "bg-red-500"
-                                )}></span>
-                                {getStatusLabel(record.status)}
-                              </span>
-                            </td>
-                          </tr>
-                        )) : (
-                          <tr>
-                            <td colSpan={2} className="py-8 text-center text-gray-500 flex flex-col items-center gap-2">
-                              <AlertCircle className="h-6 w-6 opacity-30" />
-                              Belum ada data absensi.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center">
+                      <p className="text-gray-400 text-sm font-medium">{t('no_upcoming_class')}</p>
+                    </div>
+                  )}
                 </div>
 
-                {/* Quick Stats */}
-                <div className="m3-card p-6 sm:p-8 flex flex-col justify-center items-center text-center bg-gradient-to-b from-white to-purple-50/50">
-                  <div className="w-24 h-24 rounded-full bg-[#EADDFF] flex items-center justify-center mb-6 shadow-inner">
-                    <span className="text-4xl font-bold text-[#21005D]">{grades.length}</span>
+                {/* 3. Academic Performance (Avg Score) */}
+                <div className="col-span-1 md:col-span-1 lg:col-span-1 bg-white rounded-[32px] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="bg-blue-100 p-2.5 rounded-xl">
+                      <TrendingUp className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <h3 className="font-bold text-gray-900">{t('gpa_score')}</h3>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">{t('total_exams')}</h3>
-                  <p className="text-sm text-gray-500 font-medium bg-white px-3 py-1 rounded-full border border-gray-100">
-                    {t('this_semester')}
+                  <div className="flex items-end gap-2">
+                    <span className="text-4xl font-bold text-[#1D1B20]">{avgScore > 0 ? avgScore : '-'}</span>
+                    <span className="text-sm text-gray-400 mb-1.5">/ 100</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2 mt-4">
+                    <div 
+                      className={clsx("h-2 rounded-full transition-all duration-1000", 
+                        avgScore >= 85 ? "bg-green-500" : avgScore >= 70 ? "bg-blue-500" : "bg-yellow-500"
+                      )}
+                      style={{ width: `${avgScore}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2 font-medium">
+                    {avgScore >= 85 ? t('good_job') : t('keep_improving')}
                   </p>
                 </div>
+
+                {/* 4. Recent Attendance List */}
+                <div className="col-span-1 md:col-span-2 lg:col-span-2 bg-white rounded-[32px] p-6 shadow-sm border border-gray-100">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-gray-400" />
+                      {t('recent_attendance')}
+                    </h3>
+                  </div>
+                  <div className="space-y-3">
+                    {attendance.length > 0 ? attendance.slice(0, 3).map(record => (
+                      <div key={record.id} className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className={clsx("w-2 h-10 rounded-full", 
+                             record.status === 'Present' ? "bg-green-500" :
+                             record.status === 'Sick' ? "bg-blue-500" : "bg-red-500"
+                          )}></div>
+                          <div>
+                            <p className="text-sm font-bold text-gray-900">
+                              {format(new Date(record.date), 'EEEE, dd MMM', { locale: dateLocale })}
+                            </p>
+                            <p className="text-xs text-gray-500">{record.status === 'Present' ? 'Tepat Waktu' : '-'}</p>
+                          </div>
+                        </div>
+                        <span className={clsx(
+                          "px-3 py-1 rounded-full text-xs font-bold",
+                          record.status === 'Present' ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
+                        )}>
+                          {getStatusLabel(record.status)}
+                        </span>
+                      </div>
+                    )) : (
+                      <div className="text-center py-4 text-gray-400 text-sm">Belum ada data absensi</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 5. Motivation / Quick Action */}
+                <div className="col-span-1 md:col-span-2 lg:col-span-2 bg-[#FFD8E4] rounded-[32px] p-6 relative overflow-hidden flex items-center justify-between">
+                  <div className="relative z-10">
+                    <h3 className="text-xl font-bold text-[#31111D] mb-1">Butuh Bantuan?</h3>
+                    <p className="text-[#31111D]/80 text-sm mb-4 max-w-xs">Jangan ragu untuk bertanya kepada pengajar atau admin jika mengalami kesulitan.</p>
+                    <button 
+                      onClick={() => openWhatsApp(ADMIN_PHONE, 'Halo Admin, saya butuh bantuan akademik.')}
+                      className="bg-white text-[#31111D] px-4 py-2 rounded-full text-sm font-bold shadow-sm hover:scale-105 transition-transform"
+                    >
+                      Hubungi Sekarang
+                    </button>
+                  </div>
+                  <div className="bg-white/30 p-4 rounded-full">
+                    <Star className="h-10 w-10 text-[#31111D]" />
+                  </div>
+                </div>
+
               </div>
             )}
 
