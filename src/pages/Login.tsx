@@ -27,10 +27,10 @@ export default function Login() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       toast.success(t('welcome'));
+      // Navigation handled by AuthGuard/AuthContext state change
       navigate('/dashboard');
     } catch (error: any) {
       toast.error(error.message || 'Login failed');
-    } finally {
       setLoading(false);
     }
   };
@@ -47,12 +47,12 @@ export default function Login() {
         .single();
 
       if (error || !students) {
-        throw new Error('Siswa tidak ditemukan');
+        throw new Error(t('student_not_found'));
       }
 
       // 2. Verify DOB (Password)
       if (!students.date_of_birth) {
-        throw new Error('Data tanggal lahir belum diatur. Hubungi admin.');
+        throw new Error(t('dob_missing'));
       }
 
       const dbDate = new Date(students.date_of_birth);
@@ -63,17 +63,20 @@ export default function Login() {
       const expectedPassword = `${day}${month}${year}`;
 
       if (dob !== expectedPassword) {
-        throw new Error('Tanggal lahir salah (Format: DDMMYYYY)');
+        throw new Error(t('dob_wrong'));
       }
 
       // 3. Login Success
       loginStudent(students);
       toast.success(t('student_welcome'));
-      navigate('/student-dashboard');
+      
+      // Small delay to allow Context to update before navigation
+      setTimeout(() => {
+        navigate('/student-dashboard');
+      }, 100);
 
     } catch (error: any) {
       toast.error(error.message || 'Login gagal');
-    } finally {
       setLoading(false);
     }
   };
@@ -138,7 +141,6 @@ export default function Login() {
                     <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10 h-full">
                       <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-[#4F378B] transition-colors" />
                     </div>
-                    {/* Increased padding-left to !pl-16 to ensure no overlap */}
                     <input
                       type="email"
                       required
@@ -176,7 +178,7 @@ export default function Login() {
                     <User className="h-4 w-4 text-blue-600" />
                   </div>
                   <p className="text-xs text-blue-800 leading-relaxed font-medium">
-                    Gunakan email sekolah dan tanggal lahir (DDMMYYYY) sebagai kata sandi.
+                    {t('student_login_info')}
                   </p>
                 </div>
                 <div>

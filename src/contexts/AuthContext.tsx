@@ -23,49 +23,110 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check Supabase Session (Admin)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) setRole('admin');
-    });
+    let mounted = true;
 
-    // Check Local Student Session
-    const storedStudent = localStorage.getItem('student_session');
-    if (storedStudent) {
-      setStudent(JSON.parse(storedStudent));
-      setRole('student');
-    }
+    const initializeAuth = async () => {
+      try {
+        // 1. Cek Sesi Admin (Supabase)
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
+        if (mounted) {
+          if (currentSession) {
+            setSession(currentSession);
+            setRole('admin');
+            setStudent(null);
+          } else {
+            // 2. Jika bukan admin, Cek Sesi Siswa (LocalStorage)
+            const storedStudent = localStorage.getItem('student_session');
+            if (storedStudent) {
+              try {
+                const parsedStudent = JSON.parse(storedStudent);
+                setStudent(parsedStudent);
+                setRole('student');
+                setSession(null);
+              } catch (e) {
+                console.error("Failed to parse student session", e);
+                localStorage.removeItem('student_session');
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session) {
+    initializeAuth();
+
+    // Listener untuk perubahan auth Supabase (Login/Logout Admin)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      if (!mounted) return;
+
+      if (newSession) {
+        // Jika ada sesi Supabase -> Admin Login
+        setSession(newSession);
         setRole('admin');
         setStudent(null);
         localStorage.removeItem('student_session');
-      } else if (!localStorage.getItem('student_session')) {
-        setRole(null);
+      } else {
+        // Jika sesi Supabase hilang (Logout Admin atau Login Siswa)
+        setSession(null);
+        
+        // Cek apakah ini switch ke siswa?
+        const storedStudent = localStorage.getItem('student_session');
+        if (storedStudent) {
+          try {
+            const parsedStudent = JSON.parse(storedStudent);
+            setStudent(parsedStudent);
+            setRole('student');
+          } catch {
+            setRole(null);
+            setStudent(null);
+          }
+        } else {
+          // Benar-benar logout
+          setRole(null);
+          setStudent(null);
+        }
       }
+      setLoading(false);
     });
 
-    setLoading(false);
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const loginStudent = (studentData: Student) => {
+    // Set local state first to prevent UI flicker
     setStudent(studentData);
     setRole('student');
     localStorage.setItem('student_session', JSON.stringify(studentData));
-    // Ensure admin session is cleared
+    
+    // Sign out from Supabase (Admin) if needed, but this triggers onAuthStateChange
+    // The onAuthStateChange handler above is now smart enough to check localStorage
     supabase.auth.signOut(); 
   };
 
   const logout = async () => {
-    if (role === 'admin') {
-      await supabase.auth.signOut();
+    setLoading(true);
+    try {
+      if (role === 'admin') {
+        await supabase.auth.signOut();
+      }
+      // Clear local state
+      localStorage.removeItem('student_session');
+      setStudent(null);
+      setRole(null);
+      setSession(null);
+    } finally {
+      setLoading(false);
     }
-    setStudent(null);
-    setRole(null);
-    localStorage.removeItem('student_session');
   };
 
   return (
