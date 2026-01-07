@@ -19,8 +19,8 @@ import Lottie from 'lottie-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 export default function StudentDashboard() {
-  const { student, logout, loginStudent } = useAuth();
-  const { t, language, setLanguage } = useLanguage();
+  const { student, logout } = useAuth();
+  const { t, language } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   
@@ -30,6 +30,8 @@ export default function StudentDashboard() {
   const [lottieData, setLottieData] = useState<any>(null);
   const [subjectPerformance, setSubjectPerformance] = useState<any[]>([]);
   const [attendancePercentage, setAttendancePercentage] = useState(0);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [grades, setGrades] = useState<Grade[]>([]);
 
   useEffect(() => {
     fetch('https://lottie.host/88001712-1403-4674-9844-325d7065091a/82w9X0y1yI.json')
@@ -44,6 +46,7 @@ export default function StudentDashboard() {
         // Grades & Performance
         const { data: gradesData } = await supabase.from('grades').select('*').eq('student_id', student.id);
         if (gradesData) {
+          setGrades(gradesData);
           const subjectMap: Record<string, { total: number, count: number }> = {};
           gradesData.forEach(g => {
             if (!subjectMap[g.subject]) subjectMap[g.subject] = { total: 0, count: 0 };
@@ -59,6 +62,7 @@ export default function StudentDashboard() {
         // Schedule
         const { data: scheduleData } = await supabase.from('schedules').select('*').eq('grade_level', student.grade_level);
         if (scheduleData) {
+          setSchedules(scheduleData);
           const daysMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
           const today = daysMap[new Date().getDay()];
           const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false });
@@ -82,6 +86,173 @@ export default function StudentDashboard() {
   }, [student]);
 
   if (!student) return null;
+
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'overview':
+        return (
+          <div className="grid grid-cols-12 gap-4">
+            {/* Next Class Widget */}
+            <div className="col-span-12 md:col-span-7 bg-white dark:bg-[#1D1B20] rounded-[24px] p-5 border border-gray-100 dark:border-white/5 shadow-sm">
+               <div className="flex items-center gap-2 mb-4">
+                 <div className="bg-orange-100 dark:bg-orange-900/30 p-2 rounded-xl">
+                   <Clock className="h-5 w-5 text-orange-600" />
+                 </div>
+                 <h3 className="font-bold text-[#1D1B20] dark:text-white">Kelas Berikutnya</h3>
+               </div>
+               
+               {nextClass ? (
+                 <div className="bg-[#FFF8F6] dark:bg-orange-900/10 rounded-2xl p-4 border border-orange-100 dark:border-white/5 flex justify-between items-center">
+                   <div>
+                     <p className="font-bold text-lg text-[#1D1B20] dark:text-white">{nextClass.subject}</p>
+                     <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                       <User className="h-3 w-3" /> {nextClass.teacher_name}
+                     </p>
+                   </div>
+                   <div className="text-right">
+                     <div className="bg-white dark:bg-white/10 px-3 py-1 rounded-lg text-sm font-bold text-orange-600 dark:text-orange-300 shadow-sm">
+                       {nextClass.start_time.slice(0,5)}
+                     </div>
+                     <p className="text-xs text-gray-400 mt-1">{nextClass.room || 'R. TBD'}</p>
+                   </div>
+                 </div>
+               ) : (
+                 <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-4 text-center border border-dashed border-gray-200 dark:border-white/10">
+                   <CheckCircle2 className="h-6 w-6 text-green-500 mx-auto mb-1" />
+                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Selesai untuk hari ini!</p>
+                 </div>
+               )}
+            </div>
+
+            {/* Attendance Stat */}
+            <div className="col-span-12 md:col-span-5 bg-white dark:bg-[#1D1B20] rounded-[24px] p-5 border border-gray-100 dark:border-white/5 shadow-sm flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-bold text-[#1D1B20] dark:text-white">Kehadiran</h3>
+                <Activity className="h-5 w-5 text-green-500" />
+              </div>
+              <div className="flex items-end gap-2">
+                <span className="text-4xl font-bold text-[#1D1B20] dark:text-white">{attendancePercentage}%</span>
+                <span className="text-sm text-gray-500 mb-1.5">Hadir</span>
+              </div>
+              <div className="w-full bg-gray-100 dark:bg-white/10 h-2 rounded-full mt-3 overflow-hidden">
+                <div className="bg-green-500 h-full rounded-full" style={{ width: `${attendancePercentage}%` }}></div>
+              </div>
+            </div>
+
+            {/* Performance Chart */}
+            <div className="col-span-12 bg-white dark:bg-[#1D1B20] rounded-[24px] p-5 border border-gray-100 dark:border-white/5 shadow-sm">
+               <div className="flex items-center gap-2 mb-4">
+                 <TrendingUp className="h-5 w-5 text-[#6750A4]" />
+                 <h3 className="font-bold text-[#1D1B20] dark:text-white">Statistik Nilai</h3>
+               </div>
+               <div className="h-48 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={subjectPerformance}>
+                      <defs>
+                        <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#6750A4" stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor="#6750A4" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="subject" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#9CA3AF'}} dy={10} />
+                      <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                      <Area type="monotone" dataKey="score" stroke="#6750A4" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+               </div>
+            </div>
+          </div>
+        );
+      case 'academics':
+        return (
+          <div className="space-y-6">
+            <div className="bg-white dark:bg-[#1D1B20] rounded-[24px] p-6 shadow-sm border border-gray-100 dark:border-white/5">
+              <h3 className="font-bold text-lg mb-4 text-[#1D1B20] dark:text-white flex items-center gap-2">
+                <GraduationCap className="h-5 w-5 text-blue-500" />
+                Riwayat Nilai
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 dark:border-white/5">
+                      <th className="text-left py-3 text-gray-500 font-medium">Mapel</th>
+                      <th className="text-left py-3 text-gray-500 font-medium">Tipe</th>
+                      <th className="text-right py-3 text-gray-500 font-medium">Nilai</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {grades.map(g => (
+                      <tr key={g.id} className="border-b border-gray-50 dark:border-white/5 last:border-0">
+                        <td className="py-3 font-medium text-[#1D1B20] dark:text-white">{g.subject}</td>
+                        <td className="py-3 text-gray-500">{g.exam_type}</td>
+                        <td className="py-3 text-right font-bold text-[#6750A4]">{g.score}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-[#1D1B20] rounded-[24px] p-6 shadow-sm border border-gray-100 dark:border-white/5">
+              <h3 className="font-bold text-lg mb-4 text-[#1D1B20] dark:text-white flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-purple-500" />
+                Jadwal Pelajaran
+              </h3>
+              <div className="space-y-3">
+                {schedules.map(s => (
+                  <div key={s.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-xl">
+                    <div>
+                      <p className="font-bold text-[#1D1B20] dark:text-white">{s.subject}</p>
+                      <p className="text-xs text-gray-500">{s.day_of_week}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-medium text-[#6750A4] bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded-lg">
+                        {s.start_time.slice(0,5)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      case 'profile':
+        return (
+          <div className="bg-white dark:bg-[#1D1B20] rounded-[24px] p-6 shadow-sm border border-gray-100 dark:border-white/5">
+            <div className="flex flex-col items-center mb-6">
+              <div className="h-24 w-24 rounded-full bg-gray-100 overflow-hidden mb-3 border-4 border-white shadow-lg">
+                {student.photo_url ? <img src={student.photo_url} className="w-full h-full object-cover" /> : null}
+              </div>
+              <h2 className="text-xl font-bold text-[#1D1B20] dark:text-white">{student.full_name}</h2>
+              <p className="text-gray-500">{student.grade_level}</p>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl">
+                <p className="text-xs text-gray-400 uppercase font-bold mb-1">Email</p>
+                <p className="font-medium text-[#1D1B20] dark:text-white">{student.email}</p>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl">
+                <p className="text-xs text-gray-400 uppercase font-bold mb-1">Tanggal Lahir</p>
+                <p className="font-medium text-[#1D1B20] dark:text-white">{student.date_of_birth}</p>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl">
+                <p className="text-xs text-gray-400 uppercase font-bold mb-1">Orang Tua</p>
+                <p className="font-medium text-[#1D1B20] dark:text-white">{student.parent_name} ({student.parent_phone})</p>
+              </div>
+              
+              <button 
+                onClick={() => openWhatsApp(ADMIN_PHONE, `Halo Admin, saya siswa ${student.full_name} ingin menanyakan tentang data profil.`)}
+                className="w-full m3-btn m3-btn-tonal mt-4"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Hubungi Admin
+              </button>
+            </div>
+          </div>
+        );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#FEF7FF] dark:bg-[#141218] font-sans pb-24 transition-colors duration-300">
@@ -127,79 +298,7 @@ export default function StudentDashboard() {
           <div className="absolute right-0 top-0 w-40 h-40 bg-white/10 rounded-full blur-2xl translate-x-10 -translate-y-10"></div>
         </div>
 
-        {/* Dense Grid Layout */}
-        <div className="grid grid-cols-12 gap-4">
-          
-          {/* Next Class Widget (Span 7/12 on Desktop) */}
-          <div className="col-span-12 md:col-span-7 bg-white dark:bg-[#1D1B20] rounded-[24px] p-5 border border-gray-100 dark:border-white/5 shadow-sm">
-             <div className="flex items-center gap-2 mb-4">
-               <div className="bg-orange-100 dark:bg-orange-900/30 p-2 rounded-xl">
-                 <Clock className="h-5 w-5 text-orange-600" />
-               </div>
-               <h3 className="font-bold text-[#1D1B20] dark:text-white">Kelas Berikutnya</h3>
-             </div>
-             
-             {nextClass ? (
-               <div className="bg-[#FFF8F6] dark:bg-orange-900/10 rounded-2xl p-4 border border-orange-100 dark:border-white/5 flex justify-between items-center">
-                 <div>
-                   <p className="font-bold text-lg text-[#1D1B20] dark:text-white">{nextClass.subject}</p>
-                   <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                     <User className="h-3 w-3" /> {nextClass.teacher_name}
-                   </p>
-                 </div>
-                 <div className="text-right">
-                   <div className="bg-white dark:bg-white/10 px-3 py-1 rounded-lg text-sm font-bold text-orange-600 dark:text-orange-300 shadow-sm">
-                     {nextClass.start_time.slice(0,5)}
-                   </div>
-                   <p className="text-xs text-gray-400 mt-1">{nextClass.room || 'R. TBD'}</p>
-                 </div>
-               </div>
-             ) : (
-               <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-4 text-center border border-dashed border-gray-200 dark:border-white/10">
-                 <CheckCircle2 className="h-6 w-6 text-green-500 mx-auto mb-1" />
-                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Selesai untuk hari ini!</p>
-               </div>
-             )}
-          </div>
-
-          {/* Attendance Stat (Span 5/12) */}
-          <div className="col-span-12 md:col-span-5 bg-white dark:bg-[#1D1B20] rounded-[24px] p-5 border border-gray-100 dark:border-white/5 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-bold text-[#1D1B20] dark:text-white">Kehadiran</h3>
-              <Activity className="h-5 w-5 text-green-500" />
-            </div>
-            <div className="flex items-end gap-2">
-              <span className="text-4xl font-bold text-[#1D1B20] dark:text-white">{attendancePercentage}%</span>
-              <span className="text-sm text-gray-500 mb-1.5">Hadir</span>
-            </div>
-            <div className="w-full bg-gray-100 dark:bg-white/10 h-2 rounded-full mt-3 overflow-hidden">
-              <div className="bg-green-500 h-full rounded-full" style={{ width: `${attendancePercentage}%` }}></div>
-            </div>
-          </div>
-
-          {/* Performance Chart (Full Width) */}
-          <div className="col-span-12 bg-white dark:bg-[#1D1B20] rounded-[24px] p-5 border border-gray-100 dark:border-white/5 shadow-sm">
-             <div className="flex items-center gap-2 mb-4">
-               <TrendingUp className="h-5 w-5 text-[#6750A4]" />
-               <h3 className="font-bold text-[#1D1B20] dark:text-white">Statistik Nilai</h3>
-             </div>
-             <div className="h-48 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={subjectPerformance}>
-                    <defs>
-                      <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6750A4" stopOpacity={0.2}/>
-                        <stop offset="95%" stopColor="#6750A4" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="subject" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#9CA3AF'}} dy={10} />
-                    <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                    <Area type="monotone" dataKey="score" stroke="#6750A4" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-             </div>
-          </div>
-        </div>
+        {renderContent()}
       </main>
 
       {/* Floating Bottom Nav (Mobile Only) */}

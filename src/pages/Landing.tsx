@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { GraduationCap, ArrowRight, Check, Star, Users, ShieldCheck, Zap } from 'lucide-react';
+import { GraduationCap, ArrowRight, Star, Users, ShieldCheck, Zap } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { supabase } from '../lib/supabase';
 
@@ -18,11 +18,18 @@ export default function Landing() {
     fetchStats();
   }, []);
 
+  const scrollToFeatures = () => {
+    const element = document.getElementById('features');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FEF7FF] dark:bg-[#141218] text-[#1D1B20] dark:text-[#E6E1E5] font-sans selection:bg-[#EADDFF] selection:text-[#21005D]">
       
       {/* Navbar */}
-      <nav className="fixed w-full z-50 bg-[#FEF7FF]/80 dark:bg-[#141218]/80 backdrop-blur-xl border-b border-gray-100 dark:border-white/5">
+      <nav className="fixed w-full z-50 bg-[#FEF7FF]/90 dark:bg-[#141218]/90 backdrop-blur-xl border-b border-gray-100 dark:border-white/5">
         <div className="max-w-[1440px] mx-auto px-6 h-20 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="bg-[#6750A4] p-2.5 rounded-xl text-white shadow-lg shadow-[#6750A4]/20">
@@ -52,11 +59,11 @@ export default function Landing() {
               Platform Pendidikan No. 1
             </div>
             
-            <h1 className="text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight text-[#1D1B20] dark:text-white">
+            <h1 className="text-5xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight text-[#1D1B20] dark:text-white">
               Wujudkan Masa Depan <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6750A4] to-[#D0BCFF]">Gemilang.</span>
             </h1>
             
-            <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-lg">
+            <p className="text-lg lg:text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-lg">
               Platform pendidikan holistik yang menyinergikan potensi siswa dengan teknologi terkini. Pantau akademik, kehadiran, dan jadwal dalam satu aplikasi.
             </p>
             
@@ -64,7 +71,7 @@ export default function Landing() {
               <button onClick={() => navigate('/login')} className="m3-btn m3-btn-primary h-14 px-10 text-base">
                 {t('get_started')} <ArrowRight className="ml-2 h-5 w-5" />
               </button>
-              <button className="m3-btn m3-btn-tonal h-14 px-10 text-base">
+              <button onClick={scrollToFeatures} className="m3-btn m3-btn-tonal h-14 px-10 text-base">
                 Pelajari Lebih Lanjut
               </button>
             </div>
@@ -78,7 +85,7 @@ export default function Landing() {
                 ))}
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-lg text-[#1D1B20] dark:text-white">{studentCount}+ Siswa</span>
+                <span className="font-bold text-lg text-[#1D1B20] dark:text-white">{studentCount ? `${studentCount}+` : '100+'} Siswa</span>
                 <span className="text-sm text-gray-500">Telah bergabung bersama kami</span>
               </div>
             </div>
@@ -96,7 +103,7 @@ export default function Landing() {
               <img 
                 src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80" 
                 alt="Children Learning" 
-                className="w-full h-[600px] object-cover hover:scale-105 transition-transform duration-1000"
+                className="w-full h-[500px] lg:h-[600px] object-cover hover:scale-105 transition-transform duration-1000"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
               <div className="absolute bottom-8 left-8 right-8 text-white">
@@ -111,7 +118,7 @@ export default function Landing() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-24 bg-[#F3EDF7] dark:bg-[#1D1B20] rounded-t-[64px]">
+      <section id="features" className="py-24 bg-[#F3EDF7] dark:bg-[#1D1B20] rounded-t-[64px]">
         <div className="max-w-[1440px] mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-[#6750A4] dark:text-[#D0BCFF] font-bold tracking-widest uppercase text-sm">Keunggulan Kami</span>

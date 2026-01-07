@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Student } from '../types';
-import { Plus, Search, Edit2, Trash2, Mail, Phone, Upload, User, MapPin, MessageCircle } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Mail, Phone, Upload, User, MapPin, MessageCircle, Eye, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -16,7 +16,8 @@ export default function Students() {
   
   // Modal States
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   
   // Delete Confirmation State
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -66,6 +67,16 @@ export default function Students() {
     }
   };
 
+  const handleViewDetail = (student: Student) => {
+    setSelectedStudent(student);
+    setIsDetailOpen(true);
+  };
+
+  const handleEdit = (student: Student) => {
+    setSelectedStudent(student);
+    setIsFormOpen(true);
+  };
+
   return (
     <div className="space-y-8">
       {/* Header & Actions */}
@@ -76,7 +87,7 @@ export default function Students() {
         </div>
         <div className="flex gap-3">
           <button
-            onClick={() => { setEditingStudent(null); setIsFormOpen(true); }}
+            onClick={() => { setSelectedStudent(null); setIsFormOpen(true); }}
             className="m3-btn m3-btn-primary shadow-xl shadow-blue-600/20"
           >
             <Plus className="h-5 w-5" />
@@ -86,13 +97,13 @@ export default function Students() {
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="glass-panel p-2 rounded-2xl flex items-center max-w-md bg-white">
+      <div className="glass-panel p-2 rounded-2xl flex items-center max-w-md bg-white border border-gray-200">
         <div className="p-3 text-gray-400">
           <Search className="h-5 w-5" />
         </div>
         <input
           type="text"
-          className="w-full bg-transparent border-none focus:ring-0 text-gray-700 placeholder-gray-400"
+          className="w-full bg-transparent border-none focus:ring-0 text-gray-700 placeholder-gray-400 outline-none"
           placeholder={t('search_placeholder')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -100,7 +111,7 @@ export default function Students() {
       </div>
 
       {/* Table Card */}
-      <div className="glass-card overflow-hidden border border-white/50 shadow-xl rounded-[32px]">
+      <div className="glass-card overflow-hidden border border-gray-100 shadow-lg rounded-[32px]">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-100">
             <thead>
@@ -115,7 +126,7 @@ export default function Students() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 bg-white/60">
+            <tbody className="divide-y divide-gray-100 bg-white">
               {loading ? (
                 <tr><td colSpan={6} className="text-center py-12 text-gray-500">{t('loading')}</td></tr>
               ) : filteredStudents.length === 0 ? (
@@ -123,7 +134,7 @@ export default function Students() {
               ) : (
                 filteredStudents.map((student) => (
                   <tr key={student.id} className="hover:bg-blue-50/30 transition-colors group">
-                    <td className="whitespace-nowrap py-5 pl-8 pr-4">
+                    <td className="whitespace-nowrap py-5 pl-8 pr-4 cursor-pointer" onClick={() => handleViewDetail(student)}>
                       <div className="flex items-center">
                         <div className="h-12 w-12 flex-shrink-0 rounded-full bg-gray-100 overflow-hidden border border-gray-200">
                           {student.photo_url ? (
@@ -156,19 +167,17 @@ export default function Students() {
                     </td>
                     <td className="whitespace-nowrap px-4 py-5">
                       <div className="text-sm font-medium text-gray-900">{student.parent_name}</div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <div className="text-xs text-gray-500 flex items-center gap-1">
-                          <Phone className="h-3 w-3" />
-                          {student.parent_phone}
-                        </div>
-                        {student.parent_phone && (
+                      <div className="flex items-center gap-2 mt-2">
+                        {student.parent_phone ? (
                           <button 
                             onClick={() => openWhatsApp(student.parent_phone, `Halo Bapak/Ibu ${student.parent_name}, wali dari siswa ${student.full_name}.`)}
-                            className="p-1 rounded-full bg-green-100 text-green-600 hover:bg-green-200 transition-colors"
-                            title="Chat WhatsApp"
+                            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors text-xs font-bold"
                           >
-                            <MessageCircle className="h-3 w-3" />
+                            <MessageCircle className="h-3.5 w-3.5" />
+                            Chat WA
                           </button>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">No Phone</span>
                         )}
                       </div>
                     </td>
@@ -183,17 +192,24 @@ export default function Students() {
                       </span>
                     </td>
                     <td className="relative whitespace-nowrap py-5 pl-4 pr-8 text-right text-sm font-medium">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex justify-end gap-2">
                         <button 
-                          onClick={() => { setEditingStudent(student); setIsFormOpen(true); }}
-                          className="p-2 hover:bg-blue-50 rounded-lg text-blue-600 transition-colors border border-transparent hover:border-blue-100"
+                          onClick={() => handleViewDetail(student)}
+                          className="p-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors border border-gray-200"
+                          title="Lihat Detail"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleEdit(student)}
+                          className="p-2 bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-600 transition-colors border border-blue-200"
                           title={t('edit')}
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
                         <button 
                           onClick={() => handleDeleteClick(student.id)}
-                          className="p-2 hover:bg-red-50 rounded-lg text-red-600 transition-colors border border-transparent hover:border-red-100"
+                          className="p-2 bg-red-50 hover:bg-red-100 rounded-lg text-red-600 transition-colors border border-red-200"
                           title={t('delete')}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -211,9 +227,17 @@ export default function Students() {
       {/* Form Modal */}
       {isFormOpen && (
         <StudentModal 
-          student={editingStudent} 
+          student={selectedStudent} 
           onClose={() => setIsFormOpen(false)} 
           onSuccess={() => { setIsFormOpen(false); fetchStudents(); }} 
+        />
+      )}
+
+      {/* Detail Modal */}
+      {isDetailOpen && selectedStudent && (
+        <StudentDetailModal 
+          student={selectedStudent} 
+          onClose={() => setIsDetailOpen(false)} 
         />
       )}
 
@@ -230,9 +254,93 @@ export default function Students() {
   );
 }
 
+function StudentDetailModal({ student, onClose }: { student: Student, onClose: () => void }) {
+  const { t } = useLanguage();
+  
+  return (
+    <div className="fixed inset-0 z-[100] overflow-y-auto">
+      <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:p-0">
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-md transition-opacity" onClick={onClose} />
+        
+        <div className="relative inline-block transform overflow-hidden rounded-[32px] bg-white text-left align-bottom shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle border border-gray-100">
+          <div className="absolute top-4 right-4 z-10">
+            <button onClick={onClose} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+              <X className="h-5 w-5 text-gray-500" />
+            </button>
+          </div>
+
+          <div className="px-8 pt-8 pb-6">
+            <div className="flex flex-col items-center mb-6">
+              <div className="h-24 w-24 rounded-full bg-gray-100 overflow-hidden border-4 border-white shadow-lg mb-4">
+                {student.photo_url ? (
+                  <img src={student.photo_url} alt={student.full_name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center bg-blue-100 text-blue-600 font-bold text-3xl">
+                    {student.full_name.charAt(0)}
+                  </div>
+                )}
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">{student.full_name}</h2>
+              <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm font-medium mt-2">
+                {student.grade_level} • {student.branch || 'Pusat'}
+              </span>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-gray-50 p-4 rounded-2xl">
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Informasi Pribadi</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-xs text-gray-400 block">Email</span>
+                    <span className="text-sm font-medium text-gray-900">{student.email || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-400 block">Tanggal Lahir</span>
+                    <span className="text-sm font-medium text-gray-900">{student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString() : '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-400 block">Status</span>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${student.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {student.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-2xl">
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Orang Tua / Wali</h3>
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <span className="text-xs text-gray-400 block">Nama Orang Tua</span>
+                    <span className="text-sm font-medium text-gray-900">{student.parent_name || '-'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="text-xs text-gray-400 block">Nomor Telepon</span>
+                      <span className="text-sm font-medium text-gray-900">{student.parent_phone || '-'}</span>
+                    </div>
+                    {student.parent_phone && (
+                      <button 
+                        onClick={() => openWhatsApp(student.parent_phone, `Halo Bapak/Ibu ${student.parent_name}.`)}
+                        className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
+                      >
+                        <MessageCircle className="h-5 w-5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function StudentModal({ student, onClose, onSuccess }: { student: Student | null, onClose: () => void, onSuccess: () => void }) {
   const { t } = useLanguage();
-  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<Partial<Student>>({
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm<Partial<Student>>({
     defaultValues: student || { status: 'Active', branch: 'Pusat' }
   });
   const [saving, setSaving] = useState(false);
@@ -243,7 +351,6 @@ function StudentModal({ student, onClose, onSuccess }: { student: Student | null
     if (!e.target.files || e.target.files.length === 0) return;
     
     const file = e.target.files[0];
-    // Sanitize filename to avoid special characters issues
     const fileExt = file.name.split('.').pop();
     const timestamp = Date.now();
     const fileName = `admin_upload_${timestamp}.${fileExt}`;
@@ -251,28 +358,18 @@ function StudentModal({ student, onClose, onSuccess }: { student: Student | null
 
     setUploading(true);
     try {
-      // 1. Upload File
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+        .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
-      if (uploadError) {
-        console.error('Upload error details:', uploadError);
-        throw new Error(uploadError.message);
-      }
+      if (uploadError) throw new Error(uploadError.message);
 
-      // 2. Get Public URL
       const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      
       setValue('photo_url', data.publicUrl);
       setPhotoPreview(data.publicUrl);
       toast.success('Foto berhasil diunggah');
     } catch (error: any) {
-      console.error('Error uploading photo:', error);
-      toast.error(`Gagal upload: ${error.message || 'Cek koneksi atau izin bucket'}`);
+      toast.error(`Gagal upload: ${error.message}`);
     } finally {
       setUploading(false);
     }
@@ -320,13 +417,7 @@ function StudentModal({ student, onClose, onSuccess }: { student: Student | null
                     )}
                     <label className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full">
                       <Upload className="h-6 w-6" />
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={handlePhotoUpload}
-                        disabled={uploading}
-                      />
+                      <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} disabled={uploading} />
                     </label>
                   </div>
                   {uploading && (
@@ -347,32 +438,19 @@ function StudentModal({ student, onClose, onSuccess }: { student: Student | null
               <div className="grid grid-cols-1 gap-y-5 gap-x-6 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-bold text-gray-700 mb-1.5">{t('full_name')}</label>
-                  <input 
-                    {...register('full_name', { required: true })} 
-                    className="m3-input" 
-                    placeholder={t('full_name')} 
-                  />
+                  <input {...register('full_name', { required: true })} className="m3-input" placeholder={t('full_name')} />
                   {errors.full_name && <span className="text-xs text-red-500 mt-1">{t('required_field')}</span>}
                 </div>
 
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-bold text-gray-700 mb-1.5">{t('email')}</label>
-                  <input 
-                    type="email" 
-                    {...register('email', { required: true })} 
-                    className="m3-input" 
-                    placeholder={t('email_placeholder')} 
-                  />
+                  <input type="email" {...register('email', { required: true })} className="m3-input" placeholder={t('email_placeholder')} />
                   {errors.email && <span className="text-xs text-red-500 mt-1">{t('email_required')}</span>}
                 </div>
 
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1.5">{t('dob')}</label>
-                  <input 
-                    type="date" 
-                    {...register('date_of_birth', { required: true })} 
-                    className="m3-input" 
-                  />
+                  <input type="date" {...register('date_of_birth', { required: true })} className="m3-input" />
                   {errors.date_of_birth && <span className="text-xs text-red-500 mt-1">{t('required_field')}</span>}
                 </div>
 
@@ -404,7 +482,6 @@ function StudentModal({ student, onClose, onSuccess }: { student: Student | null
                       <option value="12 SMA">12 SMA</option>
                     </optgroup>
                   </select>
-                  {errors.grade_level && <span className="text-xs text-red-500 mt-1">{t('required_field')}</span>}
                 </div>
 
                 <div>
@@ -445,18 +522,10 @@ function StudentModal({ student, onClose, onSuccess }: { student: Student | null
               </div>
             </div>
             <div className="bg-gray-50 px-8 py-5 flex flex-row-reverse gap-3 border-t border-gray-100">
-              <button
-                type="submit"
-                disabled={saving || uploading}
-                className="m3-btn m3-btn-primary px-8 py-2.5 text-sm"
-              >
+              <button type="submit" disabled={saving || uploading} className="m3-btn m3-btn-primary px-8 py-2.5 text-sm">
                 {saving ? t('saving') : t('save')}
               </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="m3-btn bg-white text-gray-700 hover:bg-gray-100 border border-gray-200 px-6 py-2.5 text-sm"
-              >
+              <button type="button" onClick={onClose} className="m3-btn bg-white text-gray-700 hover:bg-gray-100 border border-gray-200 px-6 py-2.5 text-sm">
                 {t('cancel')}
               </button>
             </div>

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, ArrowLeft, Loader2 } from 'lucide-react';
+import { GraduationCap, ArrowLeft, Loader2, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { clsx } from 'clsx';
+import { openWhatsApp, ADMIN_PHONE } from '../utils/whatsapp';
 
 export default function Login() {
   const { t } = useLanguage();
@@ -48,9 +49,12 @@ export default function Login() {
 
         if (dob !== expectedPassword) throw new Error(t('dob_wrong'));
 
+        // Success
         loginStudent(students);
         toast.success(t('student_welcome'));
-        setTimeout(() => navigate('/student-dashboard'), 100);
+        
+        // Use navigate directly instead of setTimeout for better UX
+        navigate('/student-dashboard', { replace: true });
       }
     } catch (error: any) {
       toast.error(error.message || 'Login gagal');
@@ -60,41 +64,36 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F3EDF7] dark:bg-[#141218] relative overflow-hidden p-4">
-      {/* Mesh Gradient Background */}
-      <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-[#EADDFF] dark:bg-[#4F378B] rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] opacity-60 animate-blob"></div>
-      <div className="absolute bottom-[-20%] right-[-10%] w-[800px] h-[800px] bg-[#FFD8E4] dark:bg-[#4A041D] rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] opacity-60 animate-blob animation-delay-2000"></div>
-
+    <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5] dark:bg-[#141218] relative overflow-hidden p-4">
+      
       <button 
         onClick={() => navigate('/')}
-        className="absolute top-6 left-6 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 dark:bg-black/20 backdrop-blur-md text-sm font-medium hover:bg-white/80 transition-all"
+        className="absolute top-6 left-6 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-white/10 shadow-sm border border-gray-200 dark:border-white/10 text-sm font-medium hover:bg-gray-50 transition-all"
       >
         <ArrowLeft className="h-4 w-4" />
         {t('back_to_home')}
       </button>
 
       <div className="w-full max-w-[420px] relative z-10">
-        <div className="bg-white/80 dark:bg-[#1D1B20]/80 backdrop-blur-xl rounded-[32px] shadow-xl border border-white/50 dark:border-white/10 p-8 sm:p-10">
+        <div className="bg-white dark:bg-[#1D1B20] rounded-[32px] shadow-2xl border border-gray-100 dark:border-white/10 p-8 sm:p-10">
           
           <div className="text-center mb-8">
-            <div className="bg-[#EADDFF] dark:bg-[#4F378B] w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#21005D] dark:text-[#EADDFF]">
+            <div className="bg-[#6750A4] w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg shadow-[#6750A4]/30">
               <GraduationCap className="h-8 w-8" />
             </div>
             <h1 className="text-2xl font-bold text-[#1D1B20] dark:text-white mb-1">{t('login_title')}</h1>
             <p className="text-gray-500 text-sm">Masuk untuk mengakses portal akademik</p>
           </div>
 
-          {/* M3 Segmented Button (Tabs) */}
-          <div className="flex p-1 bg-[#F3EDF7] dark:bg-[#2B2930] rounded-full mb-8 relative">
-            <div className={clsx(
-              "absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-[#4F378B] rounded-full shadow-sm transition-all duration-300 ease-out",
-              activeTab === 'student' ? "left-1" : "left-[calc(50%+2px)]"
-            )}></div>
+          {/* Solid Tabs */}
+          <div className="flex p-1 bg-gray-100 dark:bg-[#2B2930] rounded-xl mb-8">
             <button
               onClick={() => setActiveTab('student')}
               className={clsx(
-                "flex-1 py-2.5 text-sm font-medium text-center relative z-10 transition-colors",
-                activeTab === 'student' ? "text-[#1D1B20] dark:text-white" : "text-gray-500"
+                "flex-1 py-2.5 text-sm font-bold rounded-lg transition-all duration-200",
+                activeTab === 'student' 
+                  ? "bg-white dark:bg-[#4F378B] text-[#6750A4] dark:text-white shadow-sm" 
+                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
               )}
             >
               Siswa
@@ -102,8 +101,10 @@ export default function Login() {
             <button
               onClick={() => setActiveTab('staff')}
               className={clsx(
-                "flex-1 py-2.5 text-sm font-medium text-center relative z-10 transition-colors",
-                activeTab === 'staff' ? "text-[#1D1B20] dark:text-white" : "text-gray-500"
+                "flex-1 py-2.5 text-sm font-bold rounded-lg transition-all duration-200",
+                activeTab === 'staff' 
+                  ? "bg-white dark:bg-[#4F378B] text-[#6750A4] dark:text-white shadow-sm" 
+                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
               )}
             >
               Staf / Admin
@@ -111,7 +112,7 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
-            {/* Email Input (M3 Filled) */}
+            {/* Email Input */}
             <div className="relative group">
               <input
                 type="email"
@@ -161,10 +162,22 @@ export default function Login() {
               </div>
             )}
 
-            <button type="submit" disabled={loading} className="w-full m3-btn m3-btn-primary rounded-full h-14 text-base font-bold mt-4">
+            <button type="submit" disabled={loading} className="w-full m3-btn m3-btn-primary rounded-xl h-14 text-base font-bold mt-4 shadow-lg shadow-[#6750A4]/20">
               {loading ? <Loader2 className="animate-spin" /> : t('login_button')}
             </button>
           </form>
+
+          {/* Contact Admin */}
+          <div className="mt-8 text-center">
+            <button 
+              onClick={() => openWhatsApp(ADMIN_PHONE, 'Halo Admin, saya mengalami kendala saat login.')}
+              className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#6750A4] transition-colors font-medium"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Lupa Password / Hubungi Admin
+            </button>
+          </div>
+
         </div>
       </div>
     </div>

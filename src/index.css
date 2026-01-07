@@ -73,14 +73,14 @@ body {
   @apply w-full bg-[#F3EDF7] dark:bg-[#2B2930] rounded-t-xl rounded-b-none border-b-2 border-[#CAC4D0] dark:border-[#938F99] px-4 py-3 text-base focus:border-[#6750A4] dark:focus:border-[#D0BCFF] focus:bg-[#E7E0EC] dark:focus:bg-[#36343b] outline-none transition-all;
 }
 
-/* Filled Input: The M3 Standard (Removed 'peer' from @apply) */
+/* Filled Input: The M3 Standard (Updated padding to prevent overlap) */
 .m3-input-filled {
-  @apply w-full bg-[#F3EDF7] dark:bg-[#2B2930] rounded-t-xl rounded-b-none border-b-2 border-[#CAC4D0] dark:border-[#938F99] px-4 pt-6 pb-2 text-base focus:border-[#6750A4] dark:focus:border-[#D0BCFF] focus:bg-[#E7E0EC] dark:focus:bg-[#36343b] outline-none transition-all placeholder-transparent;
+  @apply w-full h-[56px] bg-[#F3EDF7] dark:bg-[#2B2930] rounded-t-xl rounded-b-none border-b-2 border-[#CAC4D0] dark:border-[#938F99] px-4 pt-7 pb-2 text-base leading-tight focus:border-[#6750A4] dark:focus:border-[#D0BCFF] focus:bg-[#E7E0EC] dark:focus:bg-[#36343b] outline-none transition-all placeholder-transparent;
 }
 
 /* Floating Label for Filled Input */
 .m3-label-floating {
-  @apply absolute left-4 top-4 text-gray-500 dark:text-gray-400 text-base transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-xs peer-focus:text-[#6750A4] dark:peer-focus:text-[#D0BCFF] pointer-events-none;
+  @apply absolute left-4 top-4 text-gray-500 dark:text-gray-400 text-base transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1.5 peer-focus:text-xs peer-focus:text-[#6750A4] dark:peer-focus:text-[#D0BCFF] pointer-events-none font-medium;
 }
 
 /* Buttons */
