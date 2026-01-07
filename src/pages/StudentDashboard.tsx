@@ -281,8 +281,14 @@ export default function StudentDashboard() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-6">
-        {/* Welcome Card (Compact) */}
+        {/* Welcome Card (Compact) with Subtle Icon Background */}
         <div className="bg-gradient-to-r from-[#6750A4] to-[#7D5260] dark:from-[#381E72] dark:to-[#4A041D] rounded-[28px] p-6 text-white shadow-lg mb-6 relative overflow-hidden flex items-center justify-between">
+          
+          {/* Subtle Background Icon */}
+          <div className="absolute -left-6 -bottom-6 opacity-10 rotate-12 pointer-events-none">
+            <GraduationCap className="h-48 w-48 text-white" />
+          </div>
+
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-1 opacity-90">
               <Sparkles className="h-4 w-4 text-yellow-300" />

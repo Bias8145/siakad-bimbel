@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { GraduationCap, ArrowRight, Star, Users, ShieldCheck, Zap } from 'lucide-react';
+import { GraduationCap, ArrowRight, Star, Users, ShieldCheck, Zap, BookOpen } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { supabase } from '../lib/supabase';
 
@@ -101,15 +101,18 @@ export default function Landing() {
             <div className="absolute inset-0 bg-gradient-to-tr from-[#EADDFF] to-[#FFD8E4] dark:from-[#4F378B] dark:to-[#4A041D] rounded-[48px] rotate-3 opacity-60 blur-3xl"></div>
             <div className="relative rounded-[48px] overflow-hidden shadow-2xl border-[8px] border-white dark:border-[#2B2930]">
               <img 
-                src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80" 
-                alt="Children Learning" 
+                src="https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=1200&auto=format&fit=crop" 
+                alt="Happy Student Learning" 
                 className="w-full h-[500px] lg:h-[600px] object-cover hover:scale-105 transition-transform duration-1000"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
               <div className="absolute bottom-8 left-8 right-8 text-white">
                 <div className="bg-white/20 backdrop-blur-md border border-white/30 p-6 rounded-3xl">
-                  <p className="font-bold text-xl mb-1">Pendidikan Karakter</p>
-                  <p className="text-white/90">Membangun generasi cerdas dan berakhlak mulia sejak dini.</p>
+                  <p className="font-bold text-xl mb-1 flex items-center gap-2">
+                    <BookOpen className="h-5 w-5" />
+                    Metode Terbukti
+                  </p>
+                  <p className="text-white/90">Pendekatan personal yang membuat anak nyaman belajar.</p>
                 </div>
               </div>
             </div>
@@ -146,14 +149,20 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-[#1D1B20] text-white py-12">
+      {/* Footer - Rounded & Elegant */}
+      <footer className="bg-[#1D1B20] text-white pt-20 pb-12 rounded-t-[64px] mt-[-40px] relative z-10">
         <div className="max-w-[1440px] mx-auto px-6 text-center">
           <div className="flex items-center justify-center gap-3 mb-6">
-            <GraduationCap className="h-8 w-8 text-[#D0BCFF]" />
-            <span className="text-2xl font-bold">Bimbel Cendekia</span>
+            <div className="bg-[#D0BCFF] p-2 rounded-xl text-[#1D1B20]">
+              <GraduationCap className="h-8 w-8" />
+            </div>
+            <span className="text-2xl font-bold tracking-tight">Bimbel Cendekia</span>
           </div>
-          <p className="text-gray-400 text-sm">© 2025 Bimbel Cendekia. Hak Cipta Dilindungi.</p>
+          <p className="text-gray-400 text-sm max-w-md mx-auto mb-8">
+            Membangun masa depan cerah melalui pendidikan berkualitas dan berkarakter. Bergabunglah bersama ribuan siswa berprestasi lainnya.
+          </p>
+          <div className="w-full h-px bg-white/10 mb-8"></div>
+          <p className="text-gray-500 text-sm">© 2025 Bimbel Cendekia. Hak Cipta Dilindungi.</p>
         </div>
       </footer>
     </div>

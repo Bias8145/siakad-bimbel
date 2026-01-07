@@ -118,18 +118,18 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 lg:space-y-8">
       {/* Header */}
-      <div className="glass-panel p-8 rounded-[32px] bg-gradient-to-r from-blue-600/5 to-indigo-600/5 border-blue-100/50 relative overflow-hidden">
+      <div className="glass-panel p-6 lg:p-8 rounded-[32px] bg-gradient-to-r from-blue-600/5 to-indigo-600/5 border-blue-100/50 relative overflow-hidden">
         <div className="relative z-10">
-          <h1 className="text-3xl font-bold text-gray-900">{t('welcome')}</h1>
-          <p className="text-gray-600 mt-2 text-lg">{t('welcome_subtitle')}</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">{t('welcome')}</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2 text-base lg:text-lg">{t('welcome_subtitle')}</p>
         </div>
-        <div className="absolute right-0 top-0 w-64 h-64 bg-blue-100/50 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
+        <div className="absolute right-0 top-0 w-64 h-64 bg-blue-100/50 dark:bg-blue-900/20 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard 
           title={t('total_students')} 
           value={stats.totalStudents} 
@@ -161,14 +161,14 @@ export default function Dashboard() {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
         {/* Attendance Chart */}
-        <div className="glass-card p-8 flex flex-col">
-          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+        <div className="glass-card p-6 lg:p-8 flex flex-col">
+          <h3 className="text-lg lg:text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
             <CalendarCheck className="h-5 w-5 text-gray-400" />
             {t('attendance_overview')}
           </h3>
-          <div className="h-72 flex-1 w-full">
+          <div className="h-64 lg:h-72 flex-1 w-full">
             {stats.totalStudents > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -191,20 +191,20 @@ export default function Dashboard() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+              <div className="h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-dashed border-gray-200 dark:border-white/10">
                 <AlertCircle className="h-8 w-8 mb-2 opacity-50" />
                 <span>Belum ada data siswa</span>
               </div>
             )}
           </div>
           {stats.totalStudents > 0 && (
-            <div className="flex justify-center gap-8 mt-6 text-sm font-medium text-gray-600">
+            <div className="flex justify-center gap-8 mt-6 text-sm font-medium text-gray-600 dark:text-gray-300">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-blue-600 shadow-sm shadow-blue-600/50"></div>
                 <span>{t('present')} ({stats.attendanceToday})</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-gray-200"></div>
+                <div className="w-3 h-3 rounded-full bg-gray-200 dark:bg-gray-600"></div>
                 <span>{t('absent')} ({Math.max(0, stats.totalStudents - stats.attendanceToday)})</span>
               </div>
             </div>
@@ -212,12 +212,12 @@ export default function Dashboard() {
         </div>
 
         {/* Performance Chart */}
-        <div className="glass-card p-8 flex flex-col">
-          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+        <div className="glass-card p-6 lg:p-8 flex flex-col">
+          <h3 className="text-lg lg:text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-gray-400" />
             {t('subject_performance')}
           </h3>
-          <div className="h-72 flex-1 w-full">
+          <div className="h-64 lg:h-72 flex-1 w-full">
             {performanceData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={performanceData} barSize={40}>
@@ -249,7 +249,7 @@ export default function Dashboard() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+              <div className="h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-dashed border-gray-200 dark:border-white/10">
                 <AlertCircle className="h-8 w-8 mb-2 opacity-50" />
                 <span>{t('no_grades')}</span>
               </div>
@@ -264,15 +264,15 @@ export default function Dashboard() {
 function StatCard({ title, value, icon: Icon, color, subtext }: { title: string, value: string | number, icon: any, color: string, subtext?: string }) {
   return (
     <div className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 group">
-      <div className="p-6">
+      <div className="p-5 lg:p-6">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
-            <h3 className="text-3xl font-bold text-gray-900 tracking-tight">{value}</h3>
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{title}</p>
+            <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{value}</h3>
             {subtext && <p className="text-xs text-gray-400 mt-2 font-medium">{subtext}</p>}
           </div>
-          <div className={`rounded-2xl p-3.5 ${color} shadow-lg shadow-${color.replace('bg-', '')}/30 group-hover:scale-110 transition-transform duration-300`}>
-            <Icon className="h-6 w-6 text-white" />
+          <div className={`rounded-2xl p-3 ${color} shadow-lg shadow-${color.replace('bg-', '')}/30 group-hover:scale-110 transition-transform duration-300`}>
+            <Icon className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
           </div>
         </div>
       </div>

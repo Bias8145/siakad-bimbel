@@ -75,12 +75,17 @@ body {
 
 /* Filled Input: The M3 Standard (Updated padding to prevent overlap) */
 .m3-input-filled {
-  @apply w-full h-[56px] bg-[#F3EDF7] dark:bg-[#2B2930] rounded-t-xl rounded-b-none border-b-2 border-[#CAC4D0] dark:border-[#938F99] px-4 pt-7 pb-2 text-base leading-tight focus:border-[#6750A4] dark:focus:border-[#D0BCFF] focus:bg-[#E7E0EC] dark:focus:bg-[#36343b] outline-none transition-all placeholder-transparent;
+  @apply w-full h-[56px] bg-[#F3EDF7] dark:bg-[#2B2930] rounded-t-xl rounded-b-none border-b-2 border-[#CAC4D0] dark:border-[#938F99] px-4 pt-6 pb-2 text-base leading-tight focus:border-[#6750A4] dark:focus:border-[#D0BCFF] focus:bg-[#E7E0EC] dark:focus:bg-[#36343b] outline-none transition-all placeholder-transparent;
 }
 
-/* Floating Label for Filled Input */
+/* Floating Label for Filled Input - FIXED LOGIC */
+/* Default state (Floating): Small text at top */
 .m3-label-floating {
-  @apply absolute left-4 top-4 text-gray-500 dark:text-gray-400 text-base transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1.5 peer-focus:text-xs peer-focus:text-[#6750A4] dark:peer-focus:text-[#D0BCFF] pointer-events-none font-medium;
+  @apply absolute left-4 top-2 text-xs text-gray-500 dark:text-gray-400 transition-all pointer-events-none font-medium
+  /* Placeholder Shown state (Empty): Normal text centered */
+  peer-placeholder-shown:top-4 peer-placeholder-shown:text-base 
+  /* Focus state: Always floating, colored */
+  peer-focus:top-2 peer-focus:text-xs peer-focus:text-[#6750A4] dark:peer-focus:text-[#D0BCFF];
 }
 
 /* Buttons */
