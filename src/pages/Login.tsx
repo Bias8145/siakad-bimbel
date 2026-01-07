@@ -135,16 +135,16 @@ export default function Login() {
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">Email</label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10 h-full">
                       <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-[#4F378B] transition-colors" />
                     </div>
-                    {/* Added !pl-12 to force padding-left */}
+                    {/* Increased padding-left to !pl-16 to ensure no overlap */}
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="m3-input !pl-12 w-full font-medium text-gray-800"
+                      className="m3-input !pl-16 w-full font-medium text-gray-800"
                       placeholder="admin@school.com"
                     />
                   </div>
@@ -152,7 +152,7 @@ export default function Login() {
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">{t('password')}</label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10 h-full">
                       <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-[#4F378B] transition-colors" />
                     </div>
                     <input
@@ -160,7 +160,7 @@ export default function Login() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="m3-input !pl-12 w-full font-medium text-gray-800"
+                      className="m3-input !pl-16 w-full font-medium text-gray-800"
                       placeholder="••••••••"
                     />
                   </div>
@@ -182,7 +182,7 @@ export default function Login() {
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">Email Siswa</label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10 h-full">
                       <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-[#4F378B] transition-colors" />
                     </div>
                     <input
@@ -190,7 +190,7 @@ export default function Login() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="m3-input !pl-12 w-full font-medium text-gray-800"
+                      className="m3-input !pl-16 w-full font-medium text-gray-800"
                       placeholder={t('email_placeholder')}
                     />
                   </div>
@@ -198,7 +198,7 @@ export default function Login() {
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">{t('dob')}</label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10 h-full">
                       <Calendar className="h-5 w-5 text-gray-400 group-focus-within:text-[#4F378B] transition-colors" />
                     </div>
                     <input
@@ -206,7 +206,7 @@ export default function Login() {
                       required
                       value={dob}
                       onChange={(e) => setDob(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                      className="m3-input !pl-12 w-full tracking-wider font-medium text-gray-800"
+                      className="m3-input !pl-16 w-full tracking-wider font-medium text-gray-800"
                       placeholder="25122005"
                       maxLength={8}
                     />
