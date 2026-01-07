@@ -32,14 +32,14 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FEF7FF] text-[#1D1B20] font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-[#FEF7FF] dark:bg-[#141218] text-[#1D1B20] dark:text-[#E6E1E5] font-sans overflow-x-hidden transition-colors duration-300">
       {/* Navigation */}
-      <nav className="fixed w-full z-50 bg-[#FEF7FF]/80 backdrop-blur-md border-b border-gray-100">
+      <nav className="fixed w-full z-50 bg-[#FEF7FF]/80 dark:bg-[#141218]/80 backdrop-blur-md border-b border-gray-100 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             <div className="flex items-center gap-2">
-              <div className="bg-[#EADDFF] p-2 rounded-xl">
-                <GraduationCap className="h-8 w-8 text-[#4F378B]" />
+              <div className="bg-[#EADDFF] dark:bg-[#4F378B]/30 p-2 rounded-xl">
+                <GraduationCap className="h-8 w-8 text-[#4F378B] dark:text-[#D0BCFF]" />
               </div>
               <span className="text-xl font-bold tracking-tight">Bimbel Cendekia</span>
             </div>
@@ -64,14 +64,14 @@ export default function Landing() {
             variants={fadeInUp}
             className="space-y-8"
           >
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-[#EADDFF] text-[#21005D] text-sm font-medium">
-              <span className="flex h-2 w-2 rounded-full bg-[#4F378B] mr-2"></span>
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-[#EADDFF] dark:bg-[#4F378B]/30 text-[#21005D] dark:text-[#D0BCFF] text-sm font-medium">
+              <span className="flex h-2 w-2 rounded-full bg-[#4F378B] dark:bg-[#D0BCFF] mr-2"></span>
               Platform Bimbel Terpercaya
             </div>
-            <h1 className="text-5xl lg:text-7xl font-bold leading-tight tracking-tight text-[#1D1B20]">
+            <h1 className="text-5xl lg:text-7xl font-bold leading-tight tracking-tight text-[#1D1B20] dark:text-white">
               {t('hero_title')}
             </h1>
-            <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
+            <p className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed max-w-lg">
               {t('hero_subtitle')}
             </p>
             <div className="flex flex-wrap gap-4">
@@ -90,23 +90,24 @@ export default function Landing() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            <div className="absolute top-0 right-0 w-72 h-72 bg-[#FFD8E4] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-            <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#EADDFF] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+            <div className="absolute top-0 right-0 w-72 h-72 bg-[#FFD8E4] dark:bg-[#4A041D] rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 dark:opacity-30 animate-blob"></div>
+            <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#EADDFF] dark:bg-[#4F378B] rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 dark:opacity-30 animate-blob animation-delay-2000"></div>
             
-            <div className="relative bg-white rounded-[40px] p-6 shadow-2xl border border-gray-100 rotate-2 hover:rotate-0 transition-transform duration-500">
+            <div className="relative bg-white dark:bg-[#2B2930] rounded-[40px] p-6 shadow-2xl border border-gray-100 dark:border-white/5 rotate-2 hover:rotate-0 transition-transform duration-500">
+              {/* Child Friendly Image */}
               <img 
-                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80" 
-                alt="Students learning" 
+                src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80" 
+                alt="Happy students learning" 
                 className="rounded-[32px] w-full object-cover h-[500px]"
               />
               
-              <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-[24px] shadow-xl flex items-center gap-4 border border-gray-50">
-                <div className="bg-green-100 p-3 rounded-full">
-                  <Users className="h-6 w-6 text-green-600" />
+              <div className="absolute -bottom-6 -left-6 bg-white dark:bg-[#1D1B20] p-4 rounded-[24px] shadow-xl flex items-center gap-4 border border-gray-50 dark:border-white/5">
+                <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-full">
+                  <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Siswa Terdaftar</p>
-                  <p className="text-xl font-bold">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Siswa Terdaftar</p>
+                  <p className="text-xl font-bold dark:text-white">
                     {studentCount !== null ? `${studentCount} Siswa` : <Loader2 className="h-4 w-4 animate-spin" />}
                   </p>
                 </div>
@@ -117,34 +118,34 @@ export default function Landing() {
       </section>
 
       {/* Vision & Mission */}
-      <section className="py-20 bg-white rounded-t-[60px]">
+      <section className="py-20 bg-white dark:bg-[#1D1B20] rounded-t-[60px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">{t('vision')} & {t('mission')}</h2>
-            <div className="h-1 w-20 bg-[#4F378B] mx-auto rounded-full"></div>
+            <h2 className="text-4xl font-bold mb-4 dark:text-white">{t('vision')} & {t('mission')}</h2>
+            <div className="h-1 w-20 bg-[#4F378B] dark:bg-[#D0BCFF] mx-auto rounded-full"></div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="col-span-1 md:col-span-3 lg:col-span-1 p-8 rounded-[32px] bg-[#FEF7FF] border border-[#EADDFF]">
-              <div className="bg-[#EADDFF] w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
-                <Trophy className="h-7 w-7 text-[#21005D]" />
+            <div className="col-span-1 md:col-span-3 lg:col-span-1 p-8 rounded-[32px] bg-[#FEF7FF] dark:bg-[#2B2930] border border-[#EADDFF] dark:border-white/5">
+              <div className="bg-[#EADDFF] dark:bg-[#4F378B]/30 w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
+                <Trophy className="h-7 w-7 text-[#21005D] dark:text-[#D0BCFF]" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">{t('vision')}</h3>
-              <p className="text-gray-600 leading-relaxed">
+              <h3 className="text-2xl font-bold mb-4 dark:text-white">{t('vision')}</h3>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                 {t('vision_text')}
               </p>
             </div>
 
-            <div className="col-span-1 md:col-span-3 lg:col-span-2 p-8 rounded-[32px] bg-[#F3F4F6] border border-gray-200">
-              <div className="bg-gray-200 w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
-                <BookOpen className="h-7 w-7 text-gray-700" />
+            <div className="col-span-1 md:col-span-3 lg:col-span-2 p-8 rounded-[32px] bg-[#F3F4F6] dark:bg-[#2B2930] border border-gray-200 dark:border-white/5">
+              <div className="bg-gray-200 dark:bg-white/10 w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
+                <BookOpen className="h-7 w-7 text-gray-700 dark:text-gray-300" />
               </div>
-              <h3 className="text-2xl font-bold mb-6">{t('mission')}</h3>
+              <h3 className="text-2xl font-bold mb-6 dark:text-white">{t('mission')}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {[t('mission_text_1'), t('mission_text_2'), t('mission_text_3')].map((item, idx) => (
                   <div key={idx} className="flex items-start gap-3">
-                    <CheckCircle2 className="h-6 w-6 text-[#4F378B] flex-shrink-0" />
-                    <p className="text-gray-700">{item}</p>
+                    <CheckCircle2 className="h-6 w-6 text-[#4F378B] dark:text-[#D0BCFF] flex-shrink-0" />
+                    <p className="text-gray-700 dark:text-gray-300">{item}</p>
                   </div>
                 ))}
               </div>

@@ -9,43 +9,31 @@
 @tailwind utilities;
 
 :root {
-  /* Material 3 Expressive Color Tokens */
   --md-sys-color-primary: #4F378B;
-  --md-sys-color-on-primary: #FFFFFF;
-  --md-sys-color-primary-container: #EADDFF;
-  --md-sys-color-on-primary-container: #21005D;
-  
-  --md-sys-color-secondary: #625B71;
-  --md-sys-color-secondary-container: #E8DEF8;
-  --md-sys-color-on-secondary-container: #1D192B;
-  
-  --md-sys-color-tertiary: #7D5260;
-  --md-sys-color-tertiary-container: #FFD8E4;
-  --md-sys-color-on-tertiary-container: #31111D;
-  
   --md-sys-color-background: #FEF7FF;
   --md-sys-color-surface: #FEF7FF;
-  --md-sys-color-surface-variant: #E7E0EC;
-  --md-sys-color-on-surface: #1D1B20;
-  
-  --md-sys-color-outline: #79747E;
+}
+
+.dark {
+  --md-sys-color-primary: #D0BCFF;
+  --md-sys-color-background: #141218;
+  --md-sys-color-surface: #1D1B20;
 }
 
 body {
   font-family: 'Outfit', sans-serif;
-  background-color: var(--md-sys-color-background);
-  color: var(--md-sys-color-on-surface);
+  @apply bg-[#FEF7FF] text-[#1D1B20] dark:bg-[#141218] dark:text-[#E6E1E5] transition-colors duration-300;
   margin: 0;
   padding: 0;
 }
 
 /* M3 Expressive Utilities */
 .m3-card {
-  @apply bg-white rounded-[28px] shadow-sm border border-gray-100 transition-all duration-300;
+  @apply bg-white dark:bg-[#1D1B20] rounded-[28px] shadow-sm border border-gray-100 dark:border-gray-800 transition-all duration-300;
 }
 
 .m3-card:hover {
-  @apply shadow-md transform -translate-y-1;
+  @apply shadow-md transform -translate-y-1 dark:shadow-black/50;
 }
 
 .m3-button {
@@ -53,49 +41,34 @@ body {
 }
 
 .m3-button-primary {
-  @apply bg-[#4F378B] text-white hover:bg-[#6750A4] shadow-lg shadow-[#4F378B]/20;
+  @apply bg-[#4F378B] text-white hover:bg-[#6750A4] shadow-lg shadow-[#4F378B]/20 dark:bg-[#D0BCFF] dark:text-[#381E72] dark:hover:bg-[#E8DEF8] dark:shadow-[#D0BCFF]/10;
 }
 
 .m3-button-secondary {
-  @apply bg-[#EADDFF] text-[#21005D] hover:bg-[#D0BCFF];
+  @apply bg-[#EADDFF] text-[#21005D] hover:bg-[#D0BCFF] dark:bg-[#4A4458] dark:text-[#E8DEF8] dark:hover:bg-[#635b74];
 }
 
 .m3-input {
-  @apply w-full rounded-2xl border-gray-200 bg-gray-50/50 px-4 py-3 focus:border-[#4F378B] focus:ring-[#4F378B]/20 transition-all;
+  @apply w-full rounded-2xl border-gray-200 bg-gray-50/50 px-4 py-3 focus:border-[#4F378B] focus:ring-[#4F378B]/20 transition-all dark:bg-[#2B2930] dark:border-gray-700 dark:text-white dark:focus:border-[#D0BCFF] dark:focus:ring-[#D0BCFF]/20;
 }
 
 /* Glass Utilities */
 .glass-panel {
-  @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-xl;
+  @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-xl dark:bg-[#1D1B20]/80 dark:border-white/5 dark:shadow-black/50;
 }
 
 .glass-card {
-  @apply bg-white/60 backdrop-blur-md border border-white/30 shadow-lg rounded-[24px];
+  @apply bg-white/60 backdrop-blur-md border border-white/30 shadow-lg rounded-[24px] dark:bg-[#2B2930]/60 dark:border-white/10 dark:shadow-black/30;
 }
 
 .glass-input {
-  @apply bg-white/50 backdrop-blur-sm border border-gray-200 focus:bg-white/80 transition-all;
-}
-
-/* Print Styles */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  body {
-    background: white;
-  }
-  .m3-card, .glass-card, .glass-panel {
-    box-shadow: none;
-    border: 1px solid #ddd;
-    break-inside: avoid;
-  }
+  @apply bg-white/50 backdrop-blur-sm border border-gray-200 focus:bg-white/80 transition-all dark:bg-black/20 dark:border-gray-700 dark:text-white dark:focus:bg-black/40;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
-  height: 8px; /* Added for horizontal scroll */
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -104,37 +77,20 @@ body {
   background: #E7E0EC;
   border-radius: 4px;
 }
+.dark ::-webkit-scrollbar-thumb {
+  background: #49454F;
+}
 ::-webkit-scrollbar-thumb:hover {
   background: #CAC4D0;
 }
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #79747E;
+}
 
-/* Hide scrollbar for Chrome, Safari and Opera */
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
 }
-
-/* Hide scrollbar for IE, Edge and Firefox */
 .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-}
-
-/* Animations */
-@keyframes blob {
-  0% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(30px, -50px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.9); }
-  100% { transform: translate(0px, 0px) scale(1); }
-}
-
-.animate-blob {
-  animation: blob 7s infinite;
-}
-
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-  animation-delay: 4s;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
