@@ -337,7 +337,7 @@ export default function StudentDashboard() {
                           <Sparkles className="h-3 w-3 text-yellow-300" />
                           {getTimeBasedGreeting()}
                         </div>
-                        <h2 className="text-4xl font-bold mb-3 tracking-tight">Halo, {student.full_name.split(' ')[0]}! 👋</h2>
+                        <h2 className="text-4xl font-bold mb-3 tracking-tight">Halo, {student.full_name.split(' ')[0]}!</h2>
                         <p className="text-purple-100 opacity-90 mb-8 max-w-md text-lg leading-relaxed">{t('hello_student')}</p>
                       </div>
                       <div className="flex gap-3 flex-wrap">
