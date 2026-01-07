@@ -6,14 +6,18 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { 
   LogOut, Calendar, GraduationCap, Clock, User, Printer, Layout, 
-  UserCircle, Upload, Globe, MessageCircle, AlertCircle, ArrowRight,
-  TrendingUp, BookOpen, Star
+  UserCircle, Upload, Globe, MessageCircle, ArrowRight,
+  TrendingUp, BookOpen, Star, MapPin, Activity, CheckCircle2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { id as dateLocale } from 'date-fns/locale';
 import { clsx } from 'clsx';
 import toast from 'react-hot-toast';
 import { openWhatsApp, ADMIN_PHONE } from '../utils/whatsapp';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, 
+  PieChart, Pie, Cell, AreaChart, Area
+} from 'recharts';
 
 export default function StudentDashboard() {
   const { student, logout, loginStudent } = useAuth();
@@ -28,26 +32,45 @@ export default function StudentDashboard() {
   const [uploading, setUploading] = useState(false);
   const [nextClass, setNextClass] = useState<Schedule | null>(null);
   const [avgScore, setAvgScore] = useState(0);
+  
+  // Chart Data States
+  const [subjectPerformance, setSubjectPerformance] = useState<any[]>([]);
+  const [attendanceStats, setAttendanceStats] = useState<any[]>([]);
+  const [attendancePercentage, setAttendancePercentage] = useState(0);
 
   useEffect(() => {
     if (!student) return;
 
     const fetchData = async () => {
       try {
-        // Fetch Grades
+        // 1. Fetch Grades
         const { data: gradesData } = await supabase
           .from('grades')
           .select('*')
           .eq('student_id', student.id)
           .order('date', { ascending: false });
         
-        // Calculate Avg
+        // Process Grades for Charts
         if (gradesData && gradesData.length > 0) {
           const total = gradesData.reduce((acc, curr) => acc + Number(curr.score), 0);
           setAvgScore(Math.round(total / gradesData.length));
+
+          // Group by Subject for Bar Chart
+          const subjectMap: Record<string, { total: number, count: number }> = {};
+          gradesData.forEach(g => {
+            if (!subjectMap[g.subject]) subjectMap[g.subject] = { total: 0, count: 0 };
+            subjectMap[g.subject].total += Number(g.score);
+            subjectMap[g.subject].count += 1;
+          });
+
+          const chartData = Object.keys(subjectMap).map(subj => ({
+            subject: subj,
+            score: Math.round(subjectMap[subj].total / subjectMap[subj].count)
+          }));
+          setSubjectPerformance(chartData);
         }
 
-        // Fetch Schedule
+        // 2. Fetch Schedule
         let query = supabase
           .from('schedules')
           .select('*')
@@ -66,24 +89,47 @@ export default function StudentDashboard() {
           const today = daysMap[new Date().getDay()];
           const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false });
 
-          // Simple logic: Find class today that hasn't started, or just show first class of today
-          const todayClasses = scheduleData.filter(s => s.day_of_week === today);
+          // Sort today's classes by time
+          const todayClasses = scheduleData
+            .filter(s => s.day_of_week === today)
+            .sort((a, b) => a.start_time.localeCompare(b.start_time));
+
           const upcoming = todayClasses.find(s => s.start_time > nowTime);
-          
-          setNextClass(upcoming || todayClasses[0] || null);
+          setNextClass(upcoming || null);
         }
 
-        // Fetch Attendance
+        // 3. Fetch Attendance
         const { data: attendanceData } = await supabase
           .from('attendance')
           .select('*')
           .eq('student_id', student.id)
-          .order('date', { ascending: false })
-          .limit(10);
+          .order('date', { ascending: false });
+
+        setAttendance(attendanceData || []);
+
+        // Process Attendance for Pie Chart
+        if (attendanceData) {
+          const stats = { Present: 0, Sick: 0, Permission: 0, Alpha: 0 };
+          attendanceData.forEach(a => {
+            if (stats[a.status as keyof typeof stats] !== undefined) {
+              stats[a.status as keyof typeof stats]++;
+            }
+          });
+
+          const totalDays = attendanceData.length;
+          const presentPercentage = totalDays > 0 ? Math.round((stats.Present / totalDays) * 100) : 0;
+          setAttendancePercentage(presentPercentage);
+
+          setAttendanceStats([
+            { name: t('present'), value: stats.Present, color: '#22c55e' }, // Green
+            { name: t('permission'), value: stats.Permission, color: '#eab308' }, // Yellow
+            { name: t('sick'), value: stats.Sick, color: '#3b82f6' }, // Blue
+            { name: t('alpha'), value: stats.Alpha, color: '#ef4444' }, // Red
+          ]);
+        }
 
         setGrades(gradesData || []);
         setSchedules(scheduleData || []);
-        setAttendance(attendanceData || []);
       } catch (error) {
         console.error('Error fetching student data', error);
       } finally {
@@ -92,7 +138,7 @@ export default function StudentDashboard() {
     };
 
     fetchData();
-  }, [student]);
+  }, [student, t]);
 
   const handleLogout = () => {
     logout();
@@ -108,7 +154,7 @@ export default function StudentDashboard() {
     
     const file = e.target.files[0];
     const fileExt = file.name.split('.').pop();
-    const fileName = `${student.id}-${Math.now ? Math.now() : Date.now()}.${fileExt}`;
+    const fileName = `${student.id}-${Date.now()}.${fileExt}`;
     const filePath = `student-photos/${fileName}`;
 
     setUploading(true);
@@ -153,7 +199,7 @@ export default function StudentDashboard() {
   return (
     <div className="min-h-screen bg-[#FEF7FF] p-4 sm:p-8 font-sans pb-32 lg:pb-8">
       {/* Header */}
-      <header className="max-w-6xl mx-auto flex flex-col lg:flex-row justify-between items-center mb-8 bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 no-print gap-6">
+      <header className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center mb-8 bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 no-print gap-6">
         <div className="flex items-center gap-5 w-full lg:w-auto">
           <div className="h-16 w-16 rounded-full bg-[#EADDFF] flex items-center justify-center text-[#21005D] font-bold text-2xl overflow-hidden border-4 border-white shadow-lg shadow-purple-100">
             {student.photo_url ? (
@@ -202,7 +248,7 @@ export default function StudentDashboard() {
       </header>
 
       {/* Navigation Tabs */}
-      <div className="max-w-6xl mx-auto mb-8 flex justify-center sm:justify-start gap-2 overflow-x-auto pb-2 no-print scrollbar-hide">
+      <div className="max-w-7xl mx-auto mb-8 flex justify-center sm:justify-start gap-2 overflow-x-auto pb-2 no-print scrollbar-hide">
         {[
           { id: 'overview', icon: Layout, label: t('tab_overview') },
           { id: 'academics', icon: GraduationCap, label: t('tab_academics') },
@@ -224,7 +270,7 @@ export default function StudentDashboard() {
         ))}
       </div>
 
-      <main className="max-w-6xl mx-auto pb-12">
+      <main className="max-w-7xl mx-auto pb-12">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="w-10 h-10 border-4 border-[#4F378B] border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -232,132 +278,249 @@ export default function StudentDashboard() {
           </div>
         ) : (
           <>
-            {/* Overview Tab (Redesigned - Bento Grid) */}
+            {/* ================= OVERVIEW TAB ================= */}
             {activeTab === 'overview' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 
-                {/* 1. Welcome Card (Large) */}
-                <div className="col-span-1 md:col-span-2 lg:col-span-2 bg-gradient-to-br from-[#4F378B] to-[#21005D] rounded-[32px] p-8 text-white shadow-xl shadow-purple-900/20 relative overflow-hidden group">
-                  <div className="relative z-10">
-                    <h2 className="text-3xl font-bold mb-2">{t('welcome')} {student.full_name.split(' ')[0]}!</h2>
-                    <p className="text-purple-100 opacity-90 mb-6">{t('hello_student')}</p>
-                    <button 
-                      onClick={() => setActiveTab('academics')}
-                      className="bg-white/20 backdrop-blur-md border border-white/30 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-white hover:text-[#4F378B] transition-all flex items-center gap-2"
-                    >
-                      {t('my_grades')} <ArrowRight className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <GraduationCap className="absolute right-[-20px] bottom-[-20px] h-48 w-48 text-white opacity-10 rotate-12" />
-                </div>
-
-                {/* 2. Next Class Card */}
-                <div className="col-span-1 md:col-span-1 lg:col-span-1 bg-white rounded-[32px] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="bg-orange-100 p-2.5 rounded-xl">
-                      <Clock className="h-5 w-5 text-orange-600" />
-                    </div>
-                    <h3 className="font-bold text-gray-900">{t('next_class')}</h3>
-                  </div>
-                  {nextClass ? (
-                    <div>
-                      <p className="text-2xl font-bold text-[#1D1B20] mb-1">{nextClass.subject}</p>
-                      <p className="text-sm text-gray-500 flex items-center gap-1">
-                        <User className="h-3 w-3" /> {nextClass.teacher_name}
-                      </p>
-                      <div className="mt-4 inline-block bg-orange-50 text-orange-700 text-xs font-bold px-3 py-1.5 rounded-lg">
-                        {nextClass.start_time.slice(0, 5)} - {nextClass.end_time.slice(0, 5)}
+                {/* Top Row: Welcome & Quick Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Welcome Card */}
+                  <div className="md:col-span-2 bg-gradient-to-br from-[#4F378B] to-[#21005D] rounded-[32px] p-8 text-white shadow-xl shadow-purple-900/20 relative overflow-hidden group">
+                    <div className="relative z-10">
+                      <h2 className="text-3xl font-bold mb-2">{t('welcome')} {student.full_name.split(' ')[0]}!</h2>
+                      <p className="text-purple-100 opacity-90 mb-6 max-w-md">{t('hello_student')}</p>
+                      <div className="flex gap-3">
+                        <button 
+                          onClick={() => setActiveTab('academics')}
+                          className="bg-white text-[#4F378B] px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-50 transition-all flex items-center gap-2 shadow-lg"
+                        >
+                          {t('my_grades')} <ArrowRight className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => openWhatsApp(ADMIN_PHONE, 'Halo Admin, saya ingin konsultasi akademik.')}
+                          className="bg-[#4F378B]/50 border border-white/20 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-[#4F378B]/70 transition-all"
+                        >
+                          Konsultasi
+                        </button>
                       </div>
                     </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-center">
-                      <p className="text-gray-400 text-sm font-medium">{t('no_upcoming_class')}</p>
-                    </div>
-                  )}
-                </div>
+                    <GraduationCap className="absolute right-[-20px] bottom-[-20px] h-48 w-48 text-white opacity-10 rotate-12 group-hover:rotate-6 transition-transform duration-500" />
+                  </div>
 
-                {/* 3. Academic Performance (Avg Score) */}
-                <div className="col-span-1 md:col-span-1 lg:col-span-1 bg-white rounded-[32px] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="bg-blue-100 p-2.5 rounded-xl">
-                      <TrendingUp className="h-5 w-5 text-blue-600" />
+                  {/* Next Class Widget */}
+                  <div className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100 flex flex-col relative overflow-hidden">
+                    <div className="flex items-center gap-3 mb-4 relative z-10">
+                      <div className="bg-orange-100 p-2.5 rounded-xl">
+                        <Clock className="h-5 w-5 text-orange-600" />
+                      </div>
+                      <h3 className="font-bold text-gray-900">{t('next_class')}</h3>
                     </div>
-                    <h3 className="font-bold text-gray-900">{t('gpa_score')}</h3>
-                  </div>
-                  <div className="flex items-end gap-2">
-                    <span className="text-4xl font-bold text-[#1D1B20]">{avgScore > 0 ? avgScore : '-'}</span>
-                    <span className="text-sm text-gray-400 mb-1.5">/ 100</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2 mt-4">
-                    <div 
-                      className={clsx("h-2 rounded-full transition-all duration-1000", 
-                        avgScore >= 85 ? "bg-green-500" : avgScore >= 70 ? "bg-blue-500" : "bg-yellow-500"
-                      )}
-                      style={{ width: `${avgScore}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2 font-medium">
-                    {avgScore >= 85 ? t('good_job') : t('keep_improving')}
-                  </p>
-                </div>
-
-                {/* 4. Recent Attendance List */}
-                <div className="col-span-1 md:col-span-2 lg:col-span-2 bg-white rounded-[32px] p-6 shadow-sm border border-gray-100">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                      <Calendar className="h-5 w-5 text-gray-400" />
-                      {t('recent_attendance')}
-                    </h3>
-                  </div>
-                  <div className="space-y-3">
-                    {attendance.length > 0 ? attendance.slice(0, 3).map(record => (
-                      <div key={record.id} className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className={clsx("w-2 h-10 rounded-full", 
-                             record.status === 'Present' ? "bg-green-500" :
-                             record.status === 'Sick' ? "bg-blue-500" : "bg-red-500"
-                          )}></div>
-                          <div>
-                            <p className="text-sm font-bold text-gray-900">
-                              {format(new Date(record.date), 'EEEE, dd MMM', { locale: dateLocale })}
-                            </p>
-                            <p className="text-xs text-gray-500">{record.status === 'Present' ? 'Tepat Waktu' : '-'}</p>
-                          </div>
+                    
+                    {nextClass ? (
+                      <div className="relative z-10 flex-1 flex flex-col justify-center">
+                        <p className="text-2xl font-bold text-[#1D1B20] mb-1 line-clamp-1">{nextClass.subject}</p>
+                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                          <User className="h-3 w-3" /> <span>{nextClass.teacher_name}</span>
                         </div>
-                        <span className={clsx(
-                          "px-3 py-1 rounded-full text-xs font-bold",
-                          record.status === 'Present' ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
-                        )}>
-                          {getStatusLabel(record.status)}
-                        </span>
+                        <div className="flex items-center justify-between mt-auto">
+                          <div className="bg-orange-50 text-orange-700 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {nextClass.start_time.slice(0, 5)}
+                          </div>
+                          {nextClass.room && (
+                            <div className="text-xs font-medium text-gray-400 flex items-center gap-1">
+                              <MapPin className="h-3 w-3" /> {nextClass.room}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    )) : (
-                      <div className="text-center py-4 text-gray-400 text-sm">Belum ada data absensi</div>
+                    ) : (
+                      <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center">
+                        <div className="bg-gray-50 p-3 rounded-full mb-2">
+                          <CheckCircle2 className="h-6 w-6 text-green-500" />
+                        </div>
+                        <p className="text-gray-900 font-bold text-sm">Selesai!</p>
+                        <p className="text-gray-400 text-xs">{t('no_upcoming_class')}</p>
+                      </div>
                     )}
+                    {/* Decorative Circle */}
+                    <div className="absolute top-[-20px] right-[-20px] w-24 h-24 bg-orange-50 rounded-full opacity-50"></div>
                   </div>
                 </div>
 
-                {/* 5. Motivation / Quick Action */}
-                <div className="col-span-1 md:col-span-2 lg:col-span-2 bg-[#FFD8E4] rounded-[32px] p-6 relative overflow-hidden flex items-center justify-between">
-                  <div className="relative z-10">
-                    <h3 className="text-xl font-bold text-[#31111D] mb-1">Butuh Bantuan?</h3>
-                    <p className="text-[#31111D]/80 text-sm mb-4 max-w-xs">Jangan ragu untuk bertanya kepada pengajar atau admin jika mengalami kesulitan.</p>
-                    <button 
-                      onClick={() => openWhatsApp(ADMIN_PHONE, 'Halo Admin, saya butuh bantuan akademik.')}
-                      className="bg-white text-[#31111D] px-4 py-2 rounded-full text-sm font-bold shadow-sm hover:scale-105 transition-transform"
-                    >
-                      Hubungi Sekarang
-                    </button>
+                {/* Middle Row: Charts */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Academic Performance Chart */}
+                  <div className="lg:col-span-2 bg-white rounded-[32px] p-6 shadow-sm border border-gray-100">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5 text-blue-500" />
+                        {t('subject_performance')}
+                      </h3>
+                      <div className="text-xs font-bold bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
+                        Rata-rata: {avgScore}
+                      </div>
+                    </div>
+                    <div className="h-64 w-full">
+                      {subjectPerformance.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={subjectPerformance} barSize={32}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                            <XAxis 
+                              dataKey="subject" 
+                              axisLine={false} 
+                              tickLine={false} 
+                              tick={{fill: '#6b7280', fontSize: 11}} 
+                              dy={10}
+                            />
+                            <YAxis 
+                              hide 
+                              domain={[0, 100]} 
+                            />
+                            <RechartsTooltip 
+                              cursor={{ fill: '#f9fafb' }}
+                              contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                            />
+                            <Bar dataKey="score" radius={[6, 6, 0, 0]}>
+                              {subjectPerformance.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.score >= 85 ? '#22c55e' : entry.score >= 70 ? '#3b82f6' : '#eab308'} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                          <Activity className="h-8 w-8 mb-2 opacity-20" />
+                          <p className="text-sm">Belum ada data nilai</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="bg-white/30 p-4 rounded-full">
-                    <Star className="h-10 w-10 text-[#31111D]" />
+
+                  {/* Attendance Stats Chart */}
+                  <div className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100 flex flex-col">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                        <Calendar className="h-5 w-5 text-green-500" />
+                        {t('attendance_rate')}
+                      </h3>
+                    </div>
+                    
+                    <div className="flex-1 relative flex items-center justify-center">
+                      {attendanceStats.length > 0 && attendanceStats.some(s => s.value > 0) ? (
+                        <ResponsiveContainer width="100%" height={200}>
+                          <PieChart>
+                            <Pie
+                              data={attendanceStats}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={60}
+                              outerRadius={80}
+                              paddingAngle={5}
+                              dataKey="value"
+                              stroke="none"
+                            >
+                              {attendanceStats.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ))}
+                            </Pie>
+                            <RechartsTooltip />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div className="text-center text-gray-400 text-sm">
+                          Belum ada data absensi
+                        </div>
+                      )}
+                      
+                      {/* Center Text */}
+                      {attendanceStats.length > 0 && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                          <span className="text-3xl font-bold text-gray-900">{attendancePercentage}%</span>
+                          <span className="text-xs text-gray-500 font-medium">Hadir</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                      {attendanceStats.map((stat, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-xs text-gray-600">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: stat.color }}></div>
+                          <span>{stat.name}: {stat.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Row: Recent Activity & Motivation */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Recent Attendance List */}
+                  <div className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                        <Activity className="h-5 w-5 text-purple-500" />
+                        {t('recent_attendance')}
+                      </h3>
+                      <button onClick={() => setActiveTab('academics')} className="text-xs font-bold text-[#4F378B] hover:underline">
+                        Lihat Semua
+                      </button>
+                    </div>
+                    <div className="space-y-3">
+                      {attendance.length > 0 ? attendance.slice(0, 3).map(record => (
+                        <div key={record.id} className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className={clsx("w-2 h-10 rounded-full", 
+                               record.status === 'Present' ? "bg-green-500" :
+                               record.status === 'Sick' ? "bg-blue-500" : "bg-red-500"
+                            )}></div>
+                            <div>
+                              <p className="text-sm font-bold text-gray-900">
+                                {format(new Date(record.date), 'EEEE, dd MMM', { locale: dateLocale })}
+                              </p>
+                              <p className="text-xs text-gray-500">{record.status === 'Present' ? 'Tepat Waktu' : '-'}</p>
+                            </div>
+                          </div>
+                          <span className={clsx(
+                            "px-3 py-1 rounded-full text-xs font-bold",
+                            record.status === 'Present' ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
+                          )}>
+                            {getStatusLabel(record.status)}
+                          </span>
+                        </div>
+                      )) : (
+                        <div className="text-center py-4 text-gray-400 text-sm">Belum ada data absensi</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Motivation Card */}
+                  <div className="bg-[#FFD8E4] rounded-[32px] p-8 relative overflow-hidden flex flex-col justify-center">
+                    <div className="relative z-10">
+                      <div className="bg-white/40 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm">
+                        <Star className="h-6 w-6 text-[#31111D]" />
+                      </div>
+                      <h3 className="text-xl font-bold text-[#31111D] mb-2">Tetap Semangat!</h3>
+                      <p className="text-[#31111D]/80 text-sm mb-6 max-w-xs leading-relaxed">
+                        "Pendidikan adalah senjata paling mematikan di dunia, karena dengan pendidikan, Anda dapat mengubah dunia."
+                      </p>
+                      <button 
+                        onClick={() => openWhatsApp(ADMIN_PHONE, 'Halo Admin, saya butuh motivasi belajar.')}
+                        className="bg-white text-[#31111D] px-6 py-3 rounded-full text-sm font-bold shadow-sm hover:scale-105 transition-transform w-fit"
+                      >
+                        Hubungi Mentor
+                      </button>
+                    </div>
+                    {/* Decor */}
+                    <div className="absolute right-0 top-0 w-40 h-40 bg-white/20 rounded-full blur-2xl transform translate-x-10 -translate-y-10"></div>
+                    <div className="absolute left-0 bottom-0 w-32 h-32 bg-purple-500/10 rounded-full blur-xl transform -translate-x-10 translate-y-10"></div>
                   </div>
                 </div>
 
               </div>
             )}
 
-            {/* Academics Tab */}
+            {/* ================= ACADEMICS TAB ================= */}
             {activeTab === 'academics' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {/* Grades Section */}
@@ -469,7 +632,7 @@ export default function StudentDashboard() {
               </div>
             )}
 
-            {/* Profile Tab */}
+            {/* ================= PROFILE TAB ================= */}
             {activeTab === 'profile' && (
               <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="m3-card p-8 sm:p-10 relative overflow-hidden">
