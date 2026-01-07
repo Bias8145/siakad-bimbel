@@ -83,7 +83,7 @@ export default function StudentDashboard() {
     
     const file = e.target.files[0];
     const fileExt = file.name.split('.').pop();
-    const fileName = `${student.id}-${Math.random()}.${fileExt}`;
+    const fileName = `${student.id}-${Math.now ? Math.now() : Date.now()}.${fileExt}`;
     const filePath = `student-photos/${fileName}`;
 
     setUploading(true);
@@ -113,10 +113,20 @@ export default function StudentDashboard() {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'Present': return t('present');
+      case 'Sick': return t('sick');
+      case 'Permission': return t('permission');
+      case 'Alpha': return t('alpha');
+      default: return status;
+    }
+  };
+
   if (!student) return null;
 
   return (
-    <div className="min-h-screen bg-[#FEF7FF] p-4 sm:p-8 font-sans">
+    <div className="min-h-screen bg-[#FEF7FF] p-4 sm:p-8 font-sans pb-24 lg:pb-8">
       {/* Header */}
       <header className="max-w-6xl mx-auto flex flex-col lg:flex-row justify-between items-center mb-8 bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 no-print gap-6">
         <div className="flex items-center gap-5 w-full lg:w-auto">
@@ -244,7 +254,7 @@ export default function StudentDashboard() {
                                   record.status === 'Sick' ? "bg-blue-500" :
                                   record.status === 'Permission' ? "bg-yellow-500" : "bg-red-500"
                                 )}></span>
-                                {record.status === 'Present' ? t('present') : record.status}
+                                {getStatusLabel(record.status)}
                               </span>
                             </td>
                           </tr>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -7,10 +7,8 @@ import {
   CalendarDays, 
   GraduationCap, 
   LogOut,
-  Settings,
   Globe,
-  Menu,
-  X
+  MoreHorizontal
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { supabase } from '../lib/supabase';
@@ -21,7 +19,6 @@ export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigation = [
     { name: t('dashboard'), href: '/dashboard', icon: LayoutDashboard },
@@ -43,9 +40,9 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen font-sans text-gray-800 bg-[#FEF7FF]">
-      {/* Top Navigation Bar (Sticky) */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-white/40 shadow-sm">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+      {/* ================= DESKTOP HEADER (Sticky) ================= */}
+      <nav className="hidden lg:block fixed top-0 left-0 right-0 z-50 glass-panel border-b border-white/40 shadow-sm">
+        <div className="max-w-[1600px] mx-auto px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo Section */}
             <div className="flex items-center gap-3">
@@ -61,7 +58,7 @@ export default function Layout() {
             </div>
 
             {/* Desktop Navigation Links */}
-            <div className="hidden lg:flex items-center gap-1 bg-gray-100/50 p-1.5 rounded-full border border-gray-200/50">
+            <div className="flex items-center gap-1 bg-gray-100/50 p-1.5 rounded-full border border-gray-200/50">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href;
                 return (
@@ -83,7 +80,7 @@ export default function Layout() {
             </div>
 
             {/* Desktop Right Actions */}
-            <div className="hidden lg:flex items-center gap-3">
+            <div className="flex items-center gap-3">
               <button 
                 onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
                 className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
@@ -100,96 +97,67 @@ export default function Layout() {
                 {t('sign_out')}
               </button>
             </div>
-
-            {/* Mobile Menu Button */}
-            <button 
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 active:scale-95 transition-all"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu Drawer (Slide Over) */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-[100] lg:hidden">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-          
-          {/* Drawer Content */}
-          <div className="absolute right-0 top-0 bottom-0 w-[280px] bg-white shadow-2xl p-6 flex flex-col animate-in slide-in-from-right duration-300">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-lg font-bold text-gray-900">{t('menu')}</h2>
-              <button 
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="p-2 rounded-full hover:bg-gray-100 text-gray-500"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            <div className="flex-1 space-y-2">
-              {navigation.map((item) => {
-                const isActive = location.pathname === item.href;
-                return (
-                  <NavLink
-                    key={item.name}
-                    to={item.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={clsx(
-                      "flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-medium transition-all",
-                      isActive 
-                        ? "bg-[#4F378B] text-white shadow-lg shadow-[#4F378B]/30" 
-                        : "text-gray-600 hover:bg-gray-50"
-                    )}
-                  >
-                    <item.icon className={clsx("h-5 w-5", isActive ? "text-white" : "text-gray-400")} />
-                    {item.name}
-                  </NavLink>
-                );
-              })}
-            </div>
-
-            <div className="pt-6 border-t border-gray-100 space-y-4">
-              <button 
-                onClick={() => {
-                  setLanguage(language === 'en' ? 'id' : 'en');
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-gray-50 text-gray-700 font-medium"
-              >
-                <div className="flex items-center gap-3">
-                  <Globe className="h-5 w-5 text-gray-500" />
-                  <span>Bahasa</span>
-                </div>
-                <span className="text-xs font-bold bg-white px-2 py-1 rounded-md border border-gray-200">
-                  {language === 'en' ? 'English' : 'Indonesia'}
-                </span>
-              </button>
-
-              <button 
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-red-50 text-red-600 font-medium hover:bg-red-100 transition-colors"
-              >
-                <LogOut className="h-5 w-5" />
-                {t('sign_out')}
-              </button>
-            </div>
+      {/* ================= MOBILE HEADER (Simple) ================= */}
+      <nav className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <div className="bg-[#4F378B] p-2 rounded-lg">
+            <GraduationCap className="h-5 w-5 text-white" />
           </div>
+          <span className="font-bold text-[#4F378B]">Bimbel Cendekia</span>
         </div>
-      )}
+        <div className="flex gap-2">
+           <button 
+              onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+              className="p-2 rounded-full bg-gray-50 text-gray-600 border border-gray-100"
+            >
+              <Globe className="h-5 w-5" />
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="p-2 rounded-full bg-red-50 text-red-600"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
+        </div>
+      </nav>
 
-      {/* Main Content Area */}
-      <main className="pt-28 pb-10 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto min-h-screen transition-all duration-300">
+      {/* ================= MAIN CONTENT ================= */}
+      <main className="pt-20 lg:pt-28 pb-28 lg:pb-10 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto min-h-screen transition-all duration-300">
         <div className="animate-in fade-in duration-500 slide-in-from-bottom-4">
           <Outlet />
         </div>
       </main>
+
+      {/* ================= MOBILE BOTTOM NAVIGATION ================= */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 pb-safe pt-2 px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+        <div className="flex justify-around items-center">
+          {navigation.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <NavLink
+                key={item.name}
+                to={item.href}
+                className={clsx(
+                  "flex flex-col items-center justify-center w-full py-2 rounded-xl transition-all duration-200",
+                  isActive ? "text-[#4F378B]" : "text-gray-400 hover:text-gray-600"
+                )}
+              >
+                <div className={clsx(
+                  "p-1.5 rounded-xl mb-1 transition-all duration-200",
+                  isActive ? "bg-[#EADDFF]" : "bg-transparent"
+                )}>
+                  <item.icon className={clsx("h-5 w-5", isActive ? "fill-current" : "stroke-current")} strokeWidth={isActive ? 2.5 : 2} />
+                </div>
+                <span className="text-[10px] font-medium leading-none">{item.name}</span>
+              </NavLink>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }

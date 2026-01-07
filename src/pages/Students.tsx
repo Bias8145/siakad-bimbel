@@ -243,26 +243,36 @@ function StudentModal({ student, onClose, onSuccess }: { student: Student | null
     if (!e.target.files || e.target.files.length === 0) return;
     
     const file = e.target.files[0];
+    // Sanitize filename to avoid special characters issues
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
+    const timestamp = Date.now();
+    const fileName = `admin_upload_${timestamp}.${fileExt}`;
     const filePath = `student-photos/${fileName}`;
 
     setUploading(true);
     try {
+      // 1. Upload File
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error details:', uploadError);
+        throw new Error(uploadError.message);
+      }
 
+      // 2. Get Public URL
       const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
       
       setValue('photo_url', data.publicUrl);
       setPhotoPreview(data.publicUrl);
       toast.success('Foto berhasil diunggah');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading photo:', error);
-      toast.error('Gagal mengunggah foto. Pastikan bucket "avatars" sudah dibuat dan public.');
+      toast.error(`Gagal upload: ${error.message || 'Cek koneksi atau izin bucket'}`);
     } finally {
       setUploading(false);
     }
