@@ -8,7 +8,9 @@ import {
   GraduationCap, 
   LogOut,
   Settings,
-  Globe
+  Globe,
+  Menu,
+  X
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { supabase } from '../lib/supabase';
@@ -19,7 +21,7 @@ export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
-  const [showSettings, setShowSettings] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigation = [
     { name: t('dashboard'), href: '/dashboard', icon: LayoutDashboard },
@@ -33,143 +35,158 @@ export default function Layout() {
     try {
       await supabase.auth.signOut();
       toast.success(t('sign_out'));
-      navigate('/'); // Redirect to Landing Page
+      navigate('/'); 
     } catch (error) {
       toast.error('Error signing out');
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row font-sans text-gray-800 bg-[#FEF7FF]">
-      {/* Desktop Dock / Taskbar (Left Side) */}
-      <aside className="hidden lg:flex fixed left-6 top-6 bottom-6 w-[100px] flex-col items-center py-8 glass-panel rounded-[32px] z-50 transition-all duration-300 hover:w-72 group shadow-xl border-white/40">
-        <div className="mb-10 flex flex-col items-center justify-center w-full px-4 overflow-hidden">
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-3.5 rounded-2xl shadow-lg shadow-blue-600/20 mb-3 group-hover:scale-110 transition-transform duration-300">
-            <GraduationCap className="h-8 w-8 text-white" />
-          </div>
-          <span className="text-sm font-bold text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap tracking-tight">
-            Bimbel Cendekia
-          </span>
-        </div>
+    <div className="min-h-screen font-sans text-gray-800 bg-[#FEF7FF]">
+      {/* Top Navigation Bar (Sticky) */}
+      <nav className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-white/40 shadow-sm">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            {/* Logo Section */}
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-br from-[#4F378B] to-[#6750A4] p-2.5 rounded-xl shadow-lg shadow-[#4F378B]/20">
+                <GraduationCap className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#4F378B] to-[#21005D] tracking-tight">
+                  Bimbel Cendekia
+                </h1>
+                <p className="text-[10px] text-gray-500 font-medium tracking-widest uppercase">Academic System</p>
+              </div>
+            </div>
 
-        <nav className="flex-1 w-full px-4 space-y-3 flex flex-col items-center group-hover:items-stretch">
-          {navigation.map((item) => {
-            const isActive = location.pathname === item.href;
-            return (
-              <NavLink
-                key={item.name}
-                to={item.href}
-                className={clsx(
-                  "flex items-center p-3.5 rounded-2xl transition-all duration-300 relative group/item overflow-hidden",
-                  isActive 
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30" 
-                    : "text-gray-500 hover:bg-blue-50 hover:text-blue-600"
-                )}
-              >
-                <item.icon className={clsx("h-6 w-6 min-w-[24px]", isActive ? "text-white" : "")} />
-                <span className="ml-4 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap absolute left-14 group-hover:static">
-                  {item.name}
-                </span>
-                
-                {/* Tooltip for collapsed state */}
-                <div className="absolute left-16 bg-gray-900 text-white text-xs px-3 py-1.5 rounded-lg opacity-0 group-hover/item:opacity-100 group-hover:opacity-0 pointer-events-none transition-opacity z-50 shadow-xl font-medium">
-                  {item.name}
-                </div>
-              </NavLink>
-            );
-          })}
-        </nav>
+            {/* Desktop Navigation Links */}
+            <div className="hidden lg:flex items-center gap-1 bg-gray-100/50 p-1.5 rounded-full border border-gray-200/50">
+              {navigation.map((item) => {
+                const isActive = location.pathname === item.href;
+                return (
+                  <NavLink
+                    key={item.name}
+                    to={item.href}
+                    className={clsx(
+                      "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300",
+                      isActive 
+                        ? "bg-white text-[#4F378B] shadow-md shadow-gray-200/50" 
+                        : "text-gray-500 hover:text-[#4F378B] hover:bg-white/50"
+                    )}
+                  >
+                    <item.icon className={clsx("h-4 w-4", isActive ? "text-[#4F378B]" : "text-gray-400")} />
+                    {item.name}
+                  </NavLink>
+                );
+              })}
+            </div>
 
-        <div className="w-full px-4 space-y-3 flex flex-col items-center group-hover:items-stretch mt-auto">
-          {/* Settings Toggle */}
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className={clsx(
-              "flex items-center p-3.5 rounded-2xl transition-all duration-300 w-full relative",
-              showSettings ? "bg-gray-100 text-blue-600" : "text-gray-500 hover:bg-blue-50 hover:text-blue-600"
-            )}
-          >
-            <Settings className="h-6 w-6 min-w-[24px]" />
-            <span className="ml-4 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap absolute left-14 group-hover:static">
-              {t('settings')}
-            </span>
-          </button>
-
-          {/* Language Selector */}
-          {showSettings && (
-            <div className="absolute bottom-24 left-4 right-4 glass-card p-2 space-y-1 animate-in slide-in-from-bottom-5 fade-in border border-gray-100 shadow-2xl">
+            {/* Desktop Right Actions */}
+            <div className="hidden lg:flex items-center gap-3">
               <button 
-                onClick={() => setLanguage('en')}
-                className={clsx("w-full text-left px-3 py-2.5 rounded-xl text-sm flex items-center transition-colors", language === 'en' ? 'bg-blue-50 text-blue-600 font-medium' : 'hover:bg-gray-50 text-gray-600')}
+                onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
               >
-                <span className="mr-3 text-lg">🇬🇧</span> English
+                <Globe className="h-4 w-4" />
+                {language === 'en' ? 'EN' : 'ID'}
               </button>
+              <div className="h-8 w-[1px] bg-gray-200 mx-1"></div>
               <button 
-                onClick={() => setLanguage('id')}
-                className={clsx("w-full text-left px-3 py-2.5 rounded-xl text-sm flex items-center transition-colors", language === 'id' ? 'bg-blue-50 text-blue-600 font-medium' : 'hover:bg-gray-50 text-gray-600')}
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 transition-colors"
               >
-                <span className="mr-3 text-lg">🇮🇩</span> Indonesia
+                <LogOut className="h-4 w-4" />
+                {t('sign_out')}
               </button>
             </div>
-          )}
 
-          <button
-            onClick={handleLogout}
-            className="flex items-center p-3.5 rounded-2xl text-red-500 hover:bg-red-50 transition-all duration-300 w-full relative group/logout"
-          >
-            <LogOut className="h-6 w-6 min-w-[24px]" />
-            <span className="ml-4 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap absolute left-14 group-hover:static">
-              {t('sign_out')}
-            </span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Mobile Top Bar */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-18 glass-panel z-40 flex items-center justify-between px-6 py-4 rounded-b-[24px] mx-2 mt-2 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="bg-blue-600 p-1.5 rounded-lg">
-            <GraduationCap className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-lg font-bold text-gray-800 tracking-tight">Bimbel Cendekia</span>
-        </div>
-        <div className="flex items-center gap-2">
-           <button 
-            onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
-            className="p-2.5 rounded-full hover:bg-gray-100/80 transition-colors active:scale-95"
-          >
-            <Globe className="h-5 w-5 text-gray-600" />
-          </button>
-          <button onClick={handleLogout} className="p-2.5 rounded-full hover:bg-red-50 text-red-500 transition-colors active:scale-95">
-            <LogOut className="h-5 w-5" />
-          </button>
-        </div>
-      </header>
-
-      {/* Mobile Bottom Dock */}
-      <nav className="lg:hidden fixed bottom-6 left-6 right-6 h-20 glass-panel rounded-[24px] z-50 flex items-center justify-around px-2 shadow-2xl border-white/50">
-        {navigation.map((item) => {
-          const isActive = location.pathname === item.href;
-          return (
-            <NavLink
-              key={item.name}
-              to={item.href}
-              className={clsx(
-                "flex flex-col items-center justify-center w-14 h-14 rounded-2xl transition-all duration-300",
-                isActive 
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/40 -translate-y-6 scale-110" 
-                  : "text-gray-400 hover:text-blue-600 active:scale-95"
-              )}
+            {/* Mobile Menu Button */}
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="lg:hidden p-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 active:scale-95 transition-all"
             >
-              <item.icon className="h-6 w-6" />
-            </NavLink>
-          );
-        })}
+              <Menu className="h-6 w-6" />
+            </button>
+          </div>
+        </div>
       </nav>
 
+      {/* Mobile Menu Drawer (Slide Over) */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-[100] lg:hidden">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          
+          {/* Drawer Content */}
+          <div className="absolute right-0 top-0 bottom-0 w-[280px] bg-white shadow-2xl p-6 flex flex-col animate-in slide-in-from-right duration-300">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-lg font-bold text-gray-900">{t('menu')}</h2>
+              <button 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 rounded-full hover:bg-gray-100 text-gray-500"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="flex-1 space-y-2">
+              {navigation.map((item) => {
+                const isActive = location.pathname === item.href;
+                return (
+                  <NavLink
+                    key={item.name}
+                    to={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={clsx(
+                      "flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-medium transition-all",
+                      isActive 
+                        ? "bg-[#4F378B] text-white shadow-lg shadow-[#4F378B]/30" 
+                        : "text-gray-600 hover:bg-gray-50"
+                    )}
+                  >
+                    <item.icon className={clsx("h-5 w-5", isActive ? "text-white" : "text-gray-400")} />
+                    {item.name}
+                  </NavLink>
+                );
+              })}
+            </div>
+
+            <div className="pt-6 border-t border-gray-100 space-y-4">
+              <button 
+                onClick={() => {
+                  setLanguage(language === 'en' ? 'id' : 'en');
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-gray-50 text-gray-700 font-medium"
+              >
+                <div className="flex items-center gap-3">
+                  <Globe className="h-5 w-5 text-gray-500" />
+                  <span>Bahasa</span>
+                </div>
+                <span className="text-xs font-bold bg-white px-2 py-1 rounded-md border border-gray-200">
+                  {language === 'en' ? 'English' : 'Indonesia'}
+                </span>
+              </button>
+
+              <button 
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-red-50 text-red-600 font-medium hover:bg-red-100 transition-colors"
+              >
+                <LogOut className="h-5 w-5" />
+                {t('sign_out')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content Area */}
-      <main className="flex-1 lg:ml-[140px] p-4 lg:p-10 pt-28 lg:pt-10 pb-32 lg:pb-10 min-h-screen overflow-x-hidden transition-all duration-300">
-        <div className="max-w-[1600px] mx-auto animate-in fade-in duration-500 slide-in-from-bottom-4">
+      <main className="pt-28 pb-10 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto min-h-screen transition-all duration-300">
+        <div className="animate-in fade-in duration-500 slide-in-from-bottom-4">
           <Outlet />
         </div>
       </main>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Schedule } from '../types';
-import { Plus, Clock, MapPin, User, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Clock, MapPin, User, Edit2, Trash2, Filter } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useLanguage } from '../contexts/LanguageContext';
 import toast from 'react-hot-toast';
@@ -11,6 +11,7 @@ export default function SchedulePage() {
   const { t } = useLanguage();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBranch, setSelectedBranch] = useState<string>('All');
   
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -39,6 +40,10 @@ export default function SchedulePage() {
       setLoading(false);
     }
   };
+
+  const filteredSchedules = selectedBranch === 'All' 
+    ? schedules 
+    : schedules.filter(s => s.branch === selectedBranch);
 
   const handleDeleteClick = (id: string) => {
     setDeleteId(id);
@@ -90,24 +95,46 @@ export default function SchedulePage() {
           <h1 className="text-2xl font-bold text-gray-900">{t('class_schedule')}</h1>
           <p className="mt-1 text-sm text-gray-500">{t('schedule_subtitle')}</p>
         </div>
-        <button
-          onClick={handleAddNew}
-          className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700 hover:scale-105 transition-all"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          {t('add_class')}
-        </button>
+        <div className="flex gap-3">
+          {/* Branch Filter */}
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <select 
+              value={selectedBranch}
+              onChange={(e) => setSelectedBranch(e.target.value)}
+              className="pl-9 pr-4 py-2.5 rounded-xl bg-white border border-gray-200 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none appearance-none cursor-pointer hover:bg-gray-50 transition-colors"
+            >
+              <option value="All">{t('all_branches')}</option>
+              <option value="Pusat">Pusat</option>
+              <option value="Cabang Barat">Cabang Barat</option>
+              <option value="Cabang Timur">Cabang Timur</option>
+              <option value="Cabang Selatan">Cabang Selatan</option>
+              <option value="Cabang Utara">Cabang Utara</option>
+            </select>
+          </div>
+
+          <button
+            onClick={handleAddNew}
+            className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700 hover:scale-105 transition-all"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            {t('add_class')}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {days.map(day => {
-          const daySchedules = schedules.filter(s => s.day_of_week === day);
+          const daySchedules = filteredSchedules.filter(s => s.day_of_week === day);
           if (daySchedules.length === 0) return null;
 
           return (
             <div key={day} className="glass-card overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
-              <div className="bg-blue-50/50 px-4 py-3 border-b border-blue-100">
+              <div className="bg-blue-50/50 px-4 py-3 border-b border-blue-100 flex justify-between items-center">
                 <h3 className="text-lg font-bold text-blue-900">{getDayLabel(day)}</h3>
+                <span className="text-xs font-semibold text-blue-400 bg-white px-2 py-1 rounded-lg border border-blue-100">
+                  {daySchedules.length} Kelas
+                </span>
               </div>
               <div className="divide-y divide-gray-100/50">
                 {daySchedules.map(schedule => (
@@ -129,7 +156,7 @@ export default function SchedulePage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-red-500" />
-                        <span>{schedule.room || 'Room TBD'}</span>
+                        <span>{schedule.room || 'Room TBD'} <span className="text-gray-400">({schedule.branch || 'Pusat'})</span></span>
                       </div>
                     </div>
 
@@ -156,7 +183,7 @@ export default function SchedulePage() {
             </div>
           );
         })}
-        {schedules.length === 0 && !loading && (
+        {filteredSchedules.length === 0 && !loading && (
           <div className="col-span-full text-center py-12 text-gray-500 glass-panel rounded-2xl">
             {t('no_schedules')}
           </div>
@@ -187,7 +214,8 @@ function ScheduleModal({ schedule, onClose, onSuccess }: { schedule: Schedule | 
   const { register, handleSubmit } = useForm<Partial<Schedule>>({
     defaultValues: schedule || {
       day_of_week: 'Monday',
-      grade_level: '10 SMA'
+      grade_level: '10 SMA',
+      branch: 'Pusat'
     }
   });
   const [saving, setSaving] = useState(false);
@@ -269,6 +297,22 @@ function ScheduleModal({ schedule, onClose, onSuccess }: { schedule: Schedule | 
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('branch')}</label>
+                <select {...register('branch')} className="block w-full rounded-xl glass-input px-4 py-2">
+                  <option value="Pusat">Pusat</option>
+                  <option value="Cabang Barat">Cabang Barat</option>
+                  <option value="Cabang Timur">Cabang Timur</option>
+                  <option value="Cabang Selatan">Cabang Selatan</option>
+                  <option value="Cabang Utara">Cabang Utara</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('room')}</label>
+                <input {...register('room')} className="block w-full rounded-xl glass-input px-4 py-2" placeholder="e.g. Ruang A" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('start_time')}</label>
                 <input type="time" {...register('start_time', { required: true })} className="block w-full rounded-xl glass-input px-4 py-2" />
               </div>
@@ -276,10 +320,6 @@ function ScheduleModal({ schedule, onClose, onSuccess }: { schedule: Schedule | 
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('end_time')}</label>
                 <input type="time" {...register('end_time', { required: true })} className="block w-full rounded-xl glass-input px-4 py-2" />
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('room')}</label>
-              <input {...register('room')} className="block w-full rounded-xl glass-input px-4 py-2" placeholder="e.g. Ruang A" />
             </div>
             <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
               <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200">{t('cancel')}</button>

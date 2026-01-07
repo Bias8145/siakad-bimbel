@@ -9,6 +9,8 @@ export interface Student {
   address: string | null;
   grade_level: string;
   status: 'Active' | 'Inactive';
+  branch: string | null;
+  photo_url: string | null;
   created_at: string;
 }
 
@@ -21,6 +23,7 @@ export interface Schedule {
   end_time: string;
   room: string | null;
   grade_level: string;
+  branch: string | null;
 }
 
 export interface Attendance {
@@ -39,8 +42,6 @@ export interface Grade {
   exam_type: string;
   score: number;
   date: string;
-  // Supabase join returns an object or array depending on relation, 
-  // here we type it as a partial Student or any to avoid build errors
   student?: {
     full_name: string;
     grade_level: string;

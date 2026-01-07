@@ -11,6 +11,7 @@ export const translations = {
     settings: 'Settings',
     sign_out: 'Sign Out',
     back_to_home: 'Back to Home',
+    menu: 'Menu',
 
     // Landing Page
     hero_title: 'Achieve Peak Performance with Bimbel Cendekia',
@@ -70,6 +71,12 @@ export const translations = {
     no_students: 'No students found.',
     confirm_delete_title: 'Delete Student?',
     confirm_delete_desc: 'Are you sure you want to delete this student? This action cannot be undone and will remove all related grades and attendance data.',
+    branch: 'Branch',
+    select_branch: 'Select Branch',
+    photo: 'Photo',
+    upload_photo: 'Upload Photo',
+    change_photo: 'Change Photo',
+    uploading: 'Uploading...',
     
     // Student Form
     edit_student: 'Edit Student',
@@ -123,6 +130,8 @@ export const translations = {
     confirm_delete_schedule: 'Delete Schedule?',
     confirm_delete_schedule_desc: 'Are you sure you want to remove this class from the schedule?',
     no_schedules: 'No schedules available.',
+    filter_branch: 'Filter by Branch',
+    all_branches: 'All Branches',
 
     // Grades Page
     student_grades: 'Student Grades',
@@ -181,6 +190,7 @@ export const translations = {
     settings: 'Pengaturan',
     sign_out: 'Keluar',
     back_to_home: 'Kembali ke Utama',
+    menu: 'Menu',
 
     // Landing Page
     hero_title: 'Raih Prestasi Puncak Bersama Bimbel Cendekia',
@@ -240,6 +250,12 @@ export const translations = {
     no_students: 'Tidak ada data siswa.',
     confirm_delete_title: 'Hapus Siswa?',
     confirm_delete_desc: 'Apakah Anda yakin ingin menghapus siswa ini? Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data nilai dan absensi terkait.',
+    branch: 'Cabang',
+    select_branch: 'Pilih Cabang',
+    photo: 'Foto Profil',
+    upload_photo: 'Unggah Foto',
+    change_photo: 'Ganti Foto',
+    uploading: 'Mengunggah...',
     
     // Student Form
     edit_student: 'Edit Data Siswa',
@@ -293,6 +309,8 @@ export const translations = {
     confirm_delete_schedule: 'Hapus Jadwal?',
     confirm_delete_schedule_desc: 'Apakah Anda yakin ingin menghapus jadwal kelas ini?',
     no_schedules: 'Jadwal belum tersedia.',
+    filter_branch: 'Filter Cabang',
+    all_branches: 'Semua Cabang',
 
     // Grades Page
     student_grades: 'Rekap Nilai',

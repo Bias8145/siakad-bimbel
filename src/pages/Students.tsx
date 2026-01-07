@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Student } from '../types';
-import { Plus, Search, Edit2, Trash2, Mail, Phone } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Mail, Phone, Upload, User, MapPin } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -43,7 +43,8 @@ export default function Students() {
 
   const filteredStudents = students.filter(student => 
     student.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.grade_level.toLowerCase().includes(searchTerm.toLowerCase())
+    student.grade_level.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (student.branch && student.branch.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleDeleteClick = (id: string) => {
@@ -105,6 +106,7 @@ export default function Students() {
               <tr className="bg-gray-50/50">
                 <th className="py-5 pl-8 pr-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{t('name_header')}</th>
                 <th className="px-4 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{t('grade_header')}</th>
+                <th className="px-4 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{t('branch')}</th>
                 <th className="px-4 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{t('parent_header')}</th>
                 <th className="px-4 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{t('status_header')}</th>
                 <th className="relative py-5 pl-4 pr-8">
@@ -114,16 +116,22 @@ export default function Students() {
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white/60">
               {loading ? (
-                <tr><td colSpan={5} className="text-center py-12 text-gray-500">{t('loading')}</td></tr>
+                <tr><td colSpan={6} className="text-center py-12 text-gray-500">{t('loading')}</td></tr>
               ) : filteredStudents.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-12 text-gray-500">{t('no_students')}</td></tr>
+                <tr><td colSpan={6} className="text-center py-12 text-gray-500">{t('no_students')}</td></tr>
               ) : (
                 filteredStudents.map((student) => (
                   <tr key={student.id} className="hover:bg-blue-50/30 transition-colors group">
                     <td className="whitespace-nowrap py-5 pl-8 pr-4">
                       <div className="flex items-center">
-                        <div className="h-12 w-12 flex-shrink-0 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-blue-700 font-bold text-lg shadow-inner border border-white">
-                          {student.full_name.charAt(0)}
+                        <div className="h-12 w-12 flex-shrink-0 rounded-full bg-gray-100 overflow-hidden border border-gray-200">
+                          {student.photo_url ? (
+                            <img src={student.photo_url} alt={student.full_name} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-bold text-lg">
+                              {student.full_name.charAt(0)}
+                            </div>
+                          )}
                         </div>
                         <div className="ml-4">
                           <div className="font-bold text-gray-900 text-base">{student.full_name}</div>
@@ -138,6 +146,12 @@ export default function Students() {
                       <span className="px-3 py-1.5 rounded-xl bg-gray-100 text-gray-700 text-sm font-semibold border border-gray-200">
                         {student.grade_level}
                       </span>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-5">
+                      <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                        <MapPin className="h-3.5 w-3.5 text-gray-400" />
+                        {student.branch || '-'}
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-4 py-5">
                       <div className="text-sm font-medium text-gray-900">{student.parent_name}</div>
@@ -206,10 +220,41 @@ export default function Students() {
 
 function StudentModal({ student, onClose, onSuccess }: { student: Student | null, onClose: () => void, onSuccess: () => void }) {
   const { t } = useLanguage();
-  const { register, handleSubmit, formState: { errors } } = useForm<Partial<Student>>({
-    defaultValues: student || { status: 'Active' }
+  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<Partial<Student>>({
+    defaultValues: student || { status: 'Active', branch: 'Pusat' }
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(student?.photo_url || null);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `student-photos/${fileName}`;
+
+    setUploading(true);
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      
+      setValue('photo_url', data.publicUrl);
+      setPhotoPreview(data.publicUrl);
+      toast.success('Foto berhasil diunggah');
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      toast.error('Gagal mengunggah foto. Pastikan bucket "avatars" sudah dibuat dan public.');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const onSubmit = async (data: Partial<Student>) => {
     setSaving(true);
@@ -237,10 +282,45 @@ function StudentModal({ student, onClose, onSuccess }: { student: Student | null
         
         <div className="relative inline-block transform overflow-hidden rounded-[32px] bg-white text-left align-bottom shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle border border-gray-100">
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="px-8 pt-8 pb-6">
+            <div className="px-8 pt-8 pb-6 max-h-[80vh] overflow-y-auto">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">
                 {student ? t('edit_student') : t('add_new_student')}
               </h3>
+
+              {/* Photo Upload Section */}
+              <div className="flex flex-col items-center mb-8">
+                <div className="relative w-24 h-24 mb-4">
+                  <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center group">
+                    {photoPreview ? (
+                      <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="h-10 w-10 text-gray-400" />
+                    )}
+                    <label className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full">
+                      <Upload className="h-6 w-6" />
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handlePhotoUpload}
+                        disabled={uploading}
+                      />
+                    </label>
+                  </div>
+                  {uploading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-full">
+                      <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  )}
+                </div>
+                <button 
+                  type="button" 
+                  className="text-sm text-blue-600 font-medium hover:underline"
+                  onClick={() => document.querySelector<HTMLInputElement>('input[type="file"]')?.click()}
+                >
+                  {t('change_photo')}
+                </button>
+              </div>
               
               <div className="grid grid-cols-1 gap-y-5 gap-x-6 sm:grid-cols-2">
                 <div className="sm:col-span-2">
@@ -306,6 +386,17 @@ function StudentModal({ student, onClose, onSuccess }: { student: Student | null
                 </div>
 
                 <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1.5">{t('branch')}</label>
+                  <select {...register('branch')} className="m3-input">
+                    <option value="Pusat">Pusat</option>
+                    <option value="Cabang Barat">Cabang Barat</option>
+                    <option value="Cabang Timur">Cabang Timur</option>
+                    <option value="Cabang Selatan">Cabang Selatan</option>
+                    <option value="Cabang Utara">Cabang Utara</option>
+                  </select>
+                </div>
+
+                <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1.5">{t('status')}</label>
                   <select {...register('status')} className="m3-input">
                     <option value="Active">{t('active')}</option>
@@ -334,7 +425,7 @@ function StudentModal({ student, onClose, onSuccess }: { student: Student | null
             <div className="bg-gray-50 px-8 py-5 flex flex-row-reverse gap-3 border-t border-gray-100">
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || uploading}
                 className="m3-button m3-button-primary px-8 py-2.5 text-sm"
               >
                 {saving ? t('saving') : t('save')}
