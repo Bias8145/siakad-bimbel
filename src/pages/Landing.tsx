@@ -92,7 +92,7 @@ export default function Landing() {
                 ))}
               </div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Bergabung dengan <span className="text-[#4F378B] dark:text-[#D0BCFF] font-bold">500+ Siswa</span> lainnya
+                Bergabung dengan <span className="text-[#4F378B] dark:text-[#D0BCFF] font-bold">Siswa</span> lainnya
               </p>
             </div>
           </motion.div>
