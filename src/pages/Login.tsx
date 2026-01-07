@@ -84,7 +84,7 @@ export default function Login() {
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#EADDFF] rounded-full mix-blend-multiply filter blur-[100px] opacity-60 animate-blob"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[#FFD8E4] rounded-full mix-blend-multiply filter blur-[100px] opacity-60 animate-blob animation-delay-2000"></div>
 
-      {/* Back Button (Top Left) - Improved Design */}
+      {/* Back Button (Top Left) */}
       <button 
         onClick={() => navigate('/')}
         className="absolute top-6 left-6 z-50 flex items-center gap-3 px-6 py-3 rounded-full bg-white/90 backdrop-blur-xl border border-white/60 shadow-lg shadow-gray-200/50 text-gray-600 hover:text-[#4F378B] hover:scale-105 hover:shadow-xl transition-all duration-300 group"
@@ -131,19 +131,20 @@ export default function Login() {
 
           <div className="px-6 pb-8">
             {activeTab === 'staff' ? (
-              <form onSubmit={handleStaffLogin} className="space-y-5">
+              <form onSubmit={handleStaffLogin} className="space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">Email</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
                       <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-[#4F378B] transition-colors" />
                     </div>
+                    {/* Added !pl-12 to force padding-left */}
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="m3-input !pl-14 w-full font-medium text-gray-800"
+                      className="m3-input !pl-12 w-full font-medium text-gray-800"
                       placeholder="admin@school.com"
                     />
                   </div>
@@ -159,17 +160,17 @@ export default function Login() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="m3-input !pl-14 w-full font-medium text-gray-800"
+                      className="m3-input !pl-12 w-full font-medium text-gray-800"
                       placeholder="••••••••"
                     />
                   </div>
                 </div>
-                <button type="submit" disabled={loading} className="w-full m3-button m3-button-primary mt-4 py-3.5 text-base shadow-xl shadow-[#4F378B]/20 hover:shadow-[#4F378B]/30 transition-all">
+                <button type="submit" disabled={loading} className="w-full m3-button m3-button-primary mt-2 py-3.5 text-base shadow-xl shadow-[#4F378B]/20 hover:shadow-[#4F378B]/30 transition-all">
                   {loading ? <Loader2 className="animate-spin" /> : t('login_button')}
                 </button>
               </form>
             ) : (
-              <form onSubmit={handleStudentLogin} className="space-y-5">
+              <form onSubmit={handleStudentLogin} className="space-y-6">
                 <div className="bg-blue-50 p-4 rounded-2xl mb-6 flex gap-3 items-start border border-blue-100">
                   <div className="bg-blue-100 p-1.5 rounded-full flex-shrink-0 mt-0.5">
                     <User className="h-4 w-4 text-blue-600" />
@@ -189,7 +190,7 @@ export default function Login() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="m3-input !pl-14 w-full font-medium text-gray-800"
+                      className="m3-input !pl-12 w-full font-medium text-gray-800"
                       placeholder={t('email_placeholder')}
                     />
                   </div>
@@ -205,13 +206,13 @@ export default function Login() {
                       required
                       value={dob}
                       onChange={(e) => setDob(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                      className="m3-input !pl-14 w-full tracking-wider font-medium text-gray-800"
+                      className="m3-input !pl-12 w-full tracking-wider font-medium text-gray-800"
                       placeholder="25122005"
                       maxLength={8}
                     />
                   </div>
                 </div>
-                <button type="submit" disabled={loading} className="w-full m3-button m3-button-primary mt-4 py-3.5 text-base shadow-xl shadow-[#4F378B]/20 hover:shadow-[#4F378B]/30 transition-all">
+                <button type="submit" disabled={loading} className="w-full m3-button m3-button-primary mt-2 py-3.5 text-base shadow-xl shadow-[#4F378B]/20 hover:shadow-[#4F378B]/30 transition-all">
                   {loading ? <Loader2 className="animate-spin" /> : t('login_button')}
                 </button>
               </form>

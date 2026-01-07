@@ -31,7 +31,9 @@ export default function Grades() {
         .order('date', { ascending: false });
       
       if (error) throw error;
-      setGrades(data || []);
+      
+      // Cast the data safely
+      setGrades((data as unknown as Grade[]) || []);
     } catch (error) {
       console.error('Error fetching grades:', error);
     } finally {
@@ -107,9 +109,8 @@ export default function Grades() {
                 grades.map((grade) => (
                   <tr key={grade.id} className="hover:bg-white/40 transition-colors group">
                     <td className="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-gray-900">
-                      {/* @ts-ignore */}
-                      {grade.student?.full_name}
-                      <div className="text-gray-500 text-xs">{/* @ts-ignore */}{grade.student?.grade_level}</div>
+                      {grade.student?.full_name || 'Unknown Student'}
+                      <div className="text-gray-500 text-xs">{grade.student?.grade_level || '-'}</div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-600">{grade.subject}</td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">

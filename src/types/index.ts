@@ -3,7 +3,7 @@ export interface Student {
   full_name: string;
   email: string | null;
   phone: string | null;
-  date_of_birth: string | null; // Added
+  date_of_birth: string | null;
   parent_name: string | null;
   parent_phone: string | null;
   address: string | null;
@@ -39,5 +39,10 @@ export interface Grade {
   exam_type: string;
   score: number;
   date: string;
-  student?: Student;
+  // Supabase join returns an object or array depending on relation, 
+  // here we type it as a partial Student or any to avoid build errors
+  student?: {
+    full_name: string;
+    grade_level: string;
+  } | null; 
 }
